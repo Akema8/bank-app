@@ -4,3 +4,6 @@ spring:
 
 server:
   port: 8080
+
+accounts:
+  url: ${ACCOUNTS_URL:http://localhost:8082}
