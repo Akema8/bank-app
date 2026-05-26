@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: auth-server
+
+server:
+  port: 9000
+
+auth:
+  issuer-uri: ${ISSUER_URI:http://localhost:9000}
+
+bank-web:
+  redirect-uri: ${BANK_WEB_REDIRECT_URI:http://localhost:8080/login/oauth2/code/bank-web}

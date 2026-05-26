@@ -15,6 +15,14 @@ services:
       timeout: 5s
       retries: 10
 
+  auth-server:
+    build: ./auth-server
+    ports:
+      - "9000:9000"
+    environment:
+      ISSUER_URI: http://localhost:9000
+      BANK_WEB_REDIRECT_URI: http://localhost:8080/login/oauth2/code/bank-web
+
   accounts:
     build: ./accounts
     ports:
@@ -23,14 +31,26 @@ services:
       DB_URL: r2dbc:mysql://mysql:3306/accounts
       DB_USERNAME: ${DB_USERNAME:-root}
       DB_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+      AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
     depends_on:
       mysql:
         condition: service_healthy
+      auth-server:
+        condition: service_started
 
   bank-web:
     build: ./bank-web
     ports:
       - "8080:8080"
+    environment:
+      ACCOUNTS_URL: http://accounts:8082
+      AUTH_ISSUER_URI: http://localhost:9000
+      AUTH_TOKEN_URI: http://auth-server:9000/oauth2/token
+      AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
+      AUTH_USERINFO_URI: http://auth-server:9000/userinfo
+    depends_on:
+      - auth-server
+      - accounts
 
 volumes:
   mysql_data:

@@ -1,13 +1,12 @@
-package ru.yandex.practicum.bankservice;
+package ru.yandex.practicum.authserver;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BankServiceApplicationTests {
+class AuthServerApplicationTests {
 
 	@Test
 	void contextLoads() {
 	}
-
 }

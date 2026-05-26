@@ -9,13 +9,18 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>bank-service</artifactId>
-	<name>bank-service</name>
+	<artifactId>auth-server</artifactId>
+	<name>auth-server</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+			<artifactId>spring-boot-starter-oauth2-authorization-server</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
