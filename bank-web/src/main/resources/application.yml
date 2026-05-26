@@ -21,6 +21,10 @@ spring:
 
 server:
   port: 8080
+  servlet:
+    session:
+      cookie:
+        name: BANKWEBSESSIONID
 
 gateway:
   url: ${GATEWAY_URL:http://localhost:8090}

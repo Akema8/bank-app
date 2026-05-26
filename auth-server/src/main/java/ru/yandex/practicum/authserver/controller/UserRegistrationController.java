@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.authserver.dto.UserRegistrationDto;
+import ru.yandex.practicum.authserver.registry.UserRegistry;
 
 @RestController
 @RequestMapping("/api")
@@ -20,6 +21,7 @@ public class UserRegistrationController {
 
     private final InMemoryUserDetailsManager userDetailsManager;
     private final PasswordEncoder passwordEncoder;
+    private final UserRegistry userRegistry;
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
@@ -34,5 +36,6 @@ public class UserRegistrationController {
                         .roles("USER")
                         .build()
         );
+        userRegistry.add(dto.login());
     }
 }

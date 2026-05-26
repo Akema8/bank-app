@@ -18,9 +18,10 @@ import java.util.Map;
 public class AccountsClient {
 
     private final RestClient accountsRestClient;
+    private final RestClient publicGatewayRestClient;
 
     public AccountDto register(AccountRegisterDto dto) {
-        return accountsRestClient.post()
+        return publicGatewayRestClient.post()
                 .uri("/accounts/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(dto)

@@ -24,9 +24,11 @@ services:
     build: ./auth-server
     ports:
       - "9000:9000"
+      - "9001:9001"
     environment:
       ISSUER_URI: http://localhost:9000
       BANK_WEB_REDIRECT_URI: http://localhost:8080/login/oauth2/code/bank-web
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: DEBUG
     depends_on:
       - eureka-server
 
@@ -70,6 +72,8 @@ services:
       AUTH_TOKEN_URI: http://auth-server:9000/oauth2/token
       AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
       AUTH_USERINFO_URI: http://auth-server:9000/userinfo
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: TRACE
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB_CLIENT: DEBUG
     depends_on:
       - auth-server
       - gateway

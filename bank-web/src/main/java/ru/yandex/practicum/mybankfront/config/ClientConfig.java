@@ -24,6 +24,13 @@ public class ClientConfig {
     }
 
     @Bean
+    RestClient publicGatewayRestClient(@Value("${gateway.url}") String gatewayUrl) {
+        return RestClient.builder()
+                .baseUrl(gatewayUrl)
+                .build();
+    }
+
+    @Bean
     RestClient authRestClient(@Value("${auth.url}") String authUrl) {
         return RestClient.builder()
                 .baseUrl(authUrl)

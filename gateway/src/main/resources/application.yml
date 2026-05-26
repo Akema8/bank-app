@@ -3,11 +3,13 @@ spring:
     name: gateway
   cloud:
     gateway:
-      routes:
-        - id: accounts
-          uri: lb://accounts
-          predicates:
-            - Path=/accounts/**
+      server:
+        webflux:
+          routes:
+            - id: accounts
+              uri: lb://accounts
+              predicates:
+                - Path=/accounts/**
 
   security:
     oauth2:
