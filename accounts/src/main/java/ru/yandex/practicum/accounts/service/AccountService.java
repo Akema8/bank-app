@@ -23,8 +23,8 @@ public class AccountService {
     private final AccountRepository accountRepository;
 
     public Mono<AccountDto> register(AccountRegisterDto dto) {
-        validateAge(dto.birthdate());
-        return accountRepository.existsByLogin(dto.login())
+        return validateAge(dto.birthdate())
+                .then(Mono.defer(() -> accountRepository.existsByLogin(dto.login())))
                 .flatMap(exists -> {
                     if (exists) {
                         return Mono.error(new ResponseStatusException(
@@ -41,8 +41,8 @@ public class AccountService {
     }
 
     public Mono<AccountDto> update(String login, AccountUpdateDto dto) {
-        validateAge(dto.birthdate());
-        return findOrThrow(login)
+        return validateAge(dto.birthdate())
+                .then(Mono.defer(() -> findOrThrow(login)))
                 .flatMap(account -> {
                     account.setName(dto.name());
                     account.setBirthdate(dto.birthdate());
@@ -62,10 +62,11 @@ public class AccountService {
                         HttpStatus.NOT_FOUND, "Такой акаунт не найден: " + login)));
     }
 
-    private void validateAge(LocalDate birthdate) {
+    private Mono<Void> validateAge(LocalDate birthdate) {
         if (birthdate.isAfter(LocalDate.now().minusYears(18))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Вам должно быть больше 18 лет");
+            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Вам должно быть больше 18 лет"));
         }
+        return Mono.empty();
     }
 
     private AccountDto toDto(Account a) {
