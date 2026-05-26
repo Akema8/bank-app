@@ -22,8 +22,8 @@ spring:
 server:
   port: 8080
 
-accounts:
-  url: ${ACCOUNTS_URL:http://localhost:8082}
+gateway:
+  url: ${GATEWAY_URL:http://localhost:8090}
 
 auth:
   url: ${AUTH_URL:http://localhost:9000}

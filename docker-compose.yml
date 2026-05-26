@@ -15,6 +15,11 @@ services:
       timeout: 5s
       retries: 10
 
+  eureka-server:
+    build: ./eureka-server
+    ports:
+      - "8761:8761"
+
   auth-server:
     build: ./auth-server
     ports:
@@ -22,6 +27,8 @@ services:
     environment:
       ISSUER_URI: http://localhost:9000
       BANK_WEB_REDIRECT_URI: http://localhost:8080/login/oauth2/code/bank-web
+    depends_on:
+      - eureka-server
 
   accounts:
     build: ./accounts
@@ -32,18 +39,32 @@ services:
       DB_USERNAME: ${DB_USERNAME:-root}
       DB_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
       AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
+      EUREKA_URL: http://eureka-server:8761/eureka/
     depends_on:
       mysql:
         condition: service_healthy
       auth-server:
         condition: service_started
+      eureka-server:
+        condition: service_started
+
+  gateway:
+    build: ./gateway
+    ports:
+      - "8090:8090"
+    environment:
+      AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
+      EUREKA_URL: http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - auth-server
 
   bank-web:
     build: ./bank-web
     ports:
       - "8080:8080"
     environment:
-      ACCOUNTS_URL: http://accounts:8082
+      GATEWAY_URL: http://gateway:8090
       AUTH_URL: http://auth-server:9000
       AUTH_AUTHORIZATION_URI: http://localhost:9000/oauth2/authorize
       AUTH_TOKEN_URI: http://auth-server:9000/oauth2/token
@@ -51,7 +72,7 @@ services:
       AUTH_USERINFO_URI: http://auth-server:9000/userinfo
     depends_on:
       - auth-server
-      - accounts
+      - gateway
 
 volumes:
   mysql_data:

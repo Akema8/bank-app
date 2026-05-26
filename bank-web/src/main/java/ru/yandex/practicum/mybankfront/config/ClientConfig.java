@@ -12,13 +12,13 @@ public class ClientConfig {
 
     @Bean
     RestClient accountsRestClient(
-            @Value("${accounts.url}") String accountsUrl,
+            @Value("${gateway.url}") String gatewayUrl,
             OAuth2AuthorizedClientManager authorizedClientManager) {
         OAuth2ClientHttpRequestInterceptor interceptor =
                 new OAuth2ClientHttpRequestInterceptor(authorizedClientManager);
         interceptor.setClientRegistrationIdResolver(request -> "bank-web");
         return RestClient.builder()
-                .baseUrl(accountsUrl)
+                .baseUrl(gatewayUrl)
                 .requestInterceptor(interceptor)
                 .build();
     }
