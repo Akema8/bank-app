@@ -3,11 +3,12 @@ package ru.yandex.practicum.accounts.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,9 +27,6 @@ public class AccountController {
 
     private final AccountService accountService;
 
-    // TODO: заменить на @AuthenticationPrincipal Jwt при подключении OAuth2
-    private static final String LOGIN_HEADER = "X-Login";
-
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<AccountDto> register(@Valid @RequestBody AccountRegisterDto dto) {
@@ -36,14 +34,14 @@ public class AccountController {
     }
 
     @GetMapping("/me")
-    public Mono<AccountDto> getMe(@RequestHeader(LOGIN_HEADER) String login) {
-        return accountService.getByLogin(login);
+    public Mono<AccountDto> getMe(@AuthenticationPrincipal Jwt jwt) {
+        return accountService.getByLogin(jwt.getSubject());
     }
 
     @PutMapping("/me")
-    public Mono<AccountDto> updateMe(@RequestHeader(LOGIN_HEADER) String login,
+    public Mono<AccountDto> updateMe(@AuthenticationPrincipal Jwt jwt,
                                      @Valid @RequestBody AccountUpdateDto dto) {
-        return accountService.update(login, dto);
+        return accountService.update(jwt.getSubject(), dto);
     }
 
     @GetMapping
