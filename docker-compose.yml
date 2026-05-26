@@ -44,7 +44,8 @@ services:
       - "8080:8080"
     environment:
       ACCOUNTS_URL: http://accounts:8082
-      AUTH_ISSUER_URI: http://localhost:9000
+      AUTH_URL: http://auth-server:9000
+      AUTH_AUTHORIZATION_URI: http://localhost:9000/oauth2/authorize
       AUTH_TOKEN_URI: http://auth-server:9000/oauth2/token
       AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
       AUTH_USERINFO_URI: http://auth-server:9000/userinfo

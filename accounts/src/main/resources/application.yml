@@ -5,6 +5,11 @@ spring:
     url: ${DB_URL:r2dbc:mysql://localhost:3306/accounts}
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${AUTH_JWK_SET_URI:http://localhost:9000/oauth2/jwks}
 
 server:
   port: 8082

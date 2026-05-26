@@ -19,12 +19,18 @@
 
     <div class="card">
         <div class="card-body">
-            <form method="post" action="/register">
+            <form method="post" th:action="@{/register}">
 
                 <div class="mb-3">
                     <label for="login" class="form-label">Логин</label>
                     <input type="text" class="form-control" id="login" name="login"
                            placeholder="ivanov" th:value="${login}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Пароль</label>
+                    <input type="password" class="form-control" id="password" name="password"
+                           required>
                 </div>
 
                 <div class="mb-3">
@@ -45,7 +51,7 @@
     </div>
 
     <div class="text-center mt-3">
-        <a href="/account" class="text-muted small">Уже есть аккаунт? Перейти на главную</a>
+        <a href="/oauth2/authorization/bank-web" class="text-muted small">Уже есть аккаунт? Войти</a>
     </div>
 
 </div>

@@ -1,6 +1,5 @@
 package ru.yandex.practicum.mybankfront.controller;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 import ru.yandex.practicum.mybankfront.client.AccountsClient;
+import ru.yandex.practicum.mybankfront.client.AuthServerClient;
 import ru.yandex.practicum.mybankfront.controller.dto.AccountRegisterDto;
 
 import java.time.LocalDate;
@@ -20,6 +20,7 @@ import java.time.LocalDate;
 public class RegisterController {
 
     private final AccountsClient accountsClient;
+    private final AuthServerClient authServerClient;
 
     @GetMapping
     public String showForm() {
@@ -29,15 +30,13 @@ public class RegisterController {
     @PostMapping
     public String register(
             @RequestParam String login,
+            @RequestParam String password,
             @RequestParam String name,
             @RequestParam LocalDate birthdate,
-            HttpSession session,
             Model model
     ) {
         try {
             accountsClient.register(new AccountRegisterDto(login, name, birthdate));
-            session.setAttribute("login", login);
-            return "redirect:/account";
         } catch (HttpClientErrorException e) {
             model.addAttribute("error", e.getResponseBodyAsString());
             model.addAttribute("login", login);
@@ -45,5 +44,17 @@ public class RegisterController {
             model.addAttribute("birthdate", birthdate);
             return "register";
         }
+
+        try {
+            authServerClient.register(login, password);
+        } catch (HttpClientErrorException e) {
+            model.addAttribute("error", "Ошибка создания учётных данных: " + e.getResponseBodyAsString());
+            model.addAttribute("login", login);
+            model.addAttribute("name", name);
+            model.addAttribute("birthdate", birthdate);
+            return "register";
+        }
+
+        return "redirect:/oauth2/authorization/bank-web";
     }
 }

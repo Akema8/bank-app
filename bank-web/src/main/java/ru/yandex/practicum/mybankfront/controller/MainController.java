@@ -1,7 +1,8 @@
 package ru.yandex.practicum.mybankfront.controller;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,18 +25,51 @@ public class MainController {
         return "redirect:/account";
     }
 
-    /**
-     * GET /account.
-     * TODO: логин получать из JWT (@AuthenticationPrincipal) после подключения OAuth2.
-     */
     @GetMapping("/account")
-    public String getAccount(Model model, HttpSession session) {
-        String login = (String) session.getAttribute("login");
-        if (login == null) {
-            return "redirect:/register";
-        }
+    public String getAccount(Model model, @AuthenticationPrincipal OAuth2User principal) {
+        return loadAccount(model, principal);
+    }
+
+    @PostMapping("/account")
+    public String editAccount(
+            Model model,
+            @AuthenticationPrincipal OAuth2User principal,
+            @RequestParam String name,
+            @RequestParam LocalDate birthdate
+    ) {
         try {
-            var account = accountsClient.getByLogin(login);
+            accountsClient.update(name, birthdate);
+        } catch (Exception e) {
+            model.addAttribute("errors", List.of(e.getMessage()));
+        }
+        return loadAccount(model, principal);
+    }
+
+    @PostMapping("/cash")
+    public String editCash(
+            Model model,
+            @AuthenticationPrincipal OAuth2User principal,
+            @RequestParam int value,
+            @RequestParam CashAction action
+    ) {
+        model.addAttribute("errors", List.of("Сервис Cash ещё не реализован"));
+        return loadAccount(model, principal);
+    }
+
+    @PostMapping("/transfer")
+    public String transfer(
+            Model model,
+            @AuthenticationPrincipal OAuth2User principal,
+            @RequestParam int value,
+            @RequestParam String login
+    ) {
+        model.addAttribute("errors", List.of("Сервис Transfer ещё не реализован"));
+        return loadAccount(model, principal);
+    }
+
+    private String loadAccount(Model model, OAuth2User principal) {
+        try {
+            var account = accountsClient.getMe();
             var accounts = accountsClient.getAll();
             model.addAttribute("name", account.name());
             model.addAttribute("birthdate", account.birthdate().toString());
@@ -46,60 +80,5 @@ public class MainController {
             model.addAttribute("accounts", List.of());
         }
         return "main";
-    }
-
-    /**
-     * POST /account.
-     * TODO: логин получать из JWT (@AuthenticationPrincipal) после подключения OAuth2.
-     */
-    @PostMapping("/account")
-    public String editAccount(
-            Model model,
-            HttpSession session,
-            @RequestParam("name") String name,
-            @RequestParam("birthdate") LocalDate birthdate
-    ) {
-        String login = (String) session.getAttribute("login");
-        if (login == null) {
-            return "redirect:/register";
-        }
-        try {
-            accountsClient.update(login, name, birthdate);
-        } catch (Exception e) {
-            model.addAttribute("errors", List.of(e.getMessage()));
-        }
-        return getAccount(model, session);
-    }
-
-    /**
-     * POST /cash.
-     * TODO: реализовать через сервис Cash после его создания.
-     */
-    @PostMapping("/cash")
-    public String editCash(
-            Model model,
-            HttpSession session,
-            @RequestParam("value") int value,
-            @RequestParam("action") CashAction action
-    ) {
-        // TODO: вызвать cash-сервис через Gateway
-        model.addAttribute("errors", List.of("Сервис Cash ещё не реализован"));
-        return getAccount(model, session);
-    }
-
-    /**
-     * POST /transfer.
-     * TODO: реализовать через сервис Transfer после его создания.
-     */
-    @PostMapping("/transfer")
-    public String transfer(
-            Model model,
-            HttpSession session,
-            @RequestParam("value") int value,
-            @RequestParam("login") String login
-    ) {
-        // TODO: вызвать transfer-сервис через Gateway
-        model.addAttribute("errors", List.of("Сервис Transfer ещё не реализован"));
-        return getAccount(model, session);
     }
 }

@@ -17,10 +17,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AccountsClient {
 
-    private final RestClient restClient;
+    private final RestClient accountsRestClient;
 
     public AccountDto register(AccountRegisterDto dto) {
-        return restClient.post()
+        return accountsRestClient.post()
                 .uri("/accounts/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(dto)
@@ -28,18 +28,16 @@ public class AccountsClient {
                 .body(AccountDto.class);
     }
 
-    public AccountDto getByLogin(String login) {
-        return restClient.get()
+    public AccountDto getMe() {
+        return accountsRestClient.get()
                 .uri("/accounts/me")
-                .header("X-Login", login)
                 .retrieve()
                 .body(AccountDto.class);
     }
 
-    public AccountDto update(String login, String name, LocalDate birthdate) {
-        return restClient.put()
+    public AccountDto update(String name, LocalDate birthdate) {
+        return accountsRestClient.put()
                 .uri("/accounts/me")
-                .header("X-Login", login)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Map.of("name", name, "birthdate", birthdate.toString()))
                 .retrieve()
@@ -47,7 +45,7 @@ public class AccountsClient {
     }
 
     public List<AccountShortDto> getAll() {
-        return restClient.get()
+        return accountsRestClient.get()
                 .uri("/accounts")
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
