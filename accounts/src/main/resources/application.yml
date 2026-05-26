@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: accounts
+  r2dbc:
+    url: ${DB_URL:r2dbc:mysql://localhost:3306/accounts}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+
+server:
+  port: 8082C

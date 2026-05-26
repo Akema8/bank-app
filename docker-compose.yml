@@ -1,0 +1,36 @@
+services:
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+      MYSQL_DATABASE: accounts
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD:-secret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  accounts:
+    build: ./accounts
+    ports:
+      - "8082:8082"
+    environment:
+      DB_URL: r2dbc:mysql://mysql:3306/accounts
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  bank-web:
+    build: ./bank-web
+    ports:
+      - "8080:8080"
+
+volumes:
+  mysql_data:

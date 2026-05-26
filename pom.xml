@@ -22,6 +22,7 @@
 	<modules>
 		<module>bank-web</module>
 		<module>bank-service</module>
+		<module>accounts</module>
 	</modules>
 
 </project>
