@@ -51,6 +51,28 @@ public class AccountService {
                 .map(this::toDto);
     }
 
+    public Mono<AccountDto> deposit(String login, BigDecimal amount) {
+        return findOrThrow(login)
+                .flatMap(account -> {
+                    account.setBalance(account.getBalance().add(amount));
+                    return accountRepository.save(account);
+                })
+                .map(this::toDto);
+    }
+
+    public Mono<AccountDto> withdraw(String login, BigDecimal amount) {
+        return findOrThrow(login)
+                .flatMap(account -> {
+                    if (account.getBalance().compareTo(amount) < 0) {
+                        return Mono.error(new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST, "Недостаточно средств на счёте"));
+                    }
+                    account.setBalance(account.getBalance().subtract(amount));
+                    return accountRepository.save(account);
+                })
+                .map(this::toDto);
+    }
+
     public Flux<AccountShortDto> getAll() {
         return accountRepository.findAll()
                 .map(a -> new AccountShortDto(a.getLogin(), a.getName()));
