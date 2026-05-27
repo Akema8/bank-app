@@ -138,7 +138,16 @@ public class SecurityConfig {
                 .scope("notifications.write")
                 .build();
 
-        return new InMemoryRegisteredClientRepository(bankWebClient, accountsClient);
+        RegisteredClient cashClient = RegisteredClient.withId(UUID.randomUUID().toString())
+                .clientId("cash-client")
+                .clientSecret(encoder.encode("cash-secret"))
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .scope("accounts.write")
+                .scope("notifications.write")
+                .build();
+
+        return new InMemoryRegisteredClientRepository(bankWebClient, accountsClient, cashClient);
     }
 
     @Bean
