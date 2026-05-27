@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: transfer
+  config:
+    import: "optional:zookeeper:"
+  cloud:
+    zookeeper:
+      connect-string: ${ZK_HOST:localhost:2181}
+      config:
+        enabled: true
+  r2dbc:
+    url: ${DB_URL:r2dbc:mysql://localhost:3306/transfer}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+  security:
+    oauth2:
+      client:
+        registration:
+          transfer-client:
+            client-id: transfer-client
+            client-secret: transfer-secret
+            authorization-grant-type: client_credentials
+            scope: accounts.write, notifications.write
+
+server:
+  port: 8085
+  error:
+    include-message: always
+
+eureka:
+  instance:
+    prefer-ip-address: true

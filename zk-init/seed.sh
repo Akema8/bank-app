@@ -14,6 +14,7 @@ deleteall /config
 create /config ""
 create /config/application ""
 create /config/cash ""
+create /config/transfer ""
 create /config/auth-server ""
 create /config/bank-web ""
 
@@ -21,6 +22,8 @@ create /config/application/eureka.client.service-url.defaultZone "http://eureka-
 create /config/application/spring.security.oauth2.resourceserver.jwt.jwk-set-uri "http://auth-server:9000/oauth2/jwks"
 
 create /config/cash/spring.security.oauth2.client.provider.cash-client.token-uri "http://auth-server:9000/oauth2/token"
+
+create /config/transfer/spring.security.oauth2.client.provider.transfer-client.token-uri "http://auth-server:9000/oauth2/token"
 
 create /config/auth-server/auth.issuer-uri "http://localhost:9000"
 create /config/auth-server/bank-web.redirect-uri "http://localhost:8080/login/oauth2/code/bank-web"

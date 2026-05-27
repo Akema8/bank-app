@@ -20,6 +20,10 @@ spring:
               uri: lb://cash
               predicates:
                 - Path=/cash/**
+            - id: transfer
+              uri: lb://transfer
+              predicates:
+                - Path=/transfer/**
 
 server:
   port: 8090

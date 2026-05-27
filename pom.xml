@@ -40,6 +40,7 @@
 		<module>gateway</module>
 		<module>cash</module>
 		<module>notifications</module>
+		<module>transfer</module>
 	</modules>
 
 </project>
