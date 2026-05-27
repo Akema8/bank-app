@@ -51,16 +51,16 @@ services:
       eureka-server:
         condition: service_started
 
-#  notifications:
-#    build: ./notifications
-#    ports:
-#      - "8083:8083"
-#    environment:
-#      AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
-#      EUREKA_URL: http://eureka-server:8761/eureka/
-#    depends_on:
-#      - auth-server
-#      - eureka-server
+  notifications:
+    build: ./notifications
+    ports:
+      - "8083:8083"
+    environment:
+      AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
+      EUREKA_URL: http://eureka-server:8761/eureka/
+    depends_on:
+      - auth-server
+      - eureka-server
 
   cash:
     build: ./cash
@@ -74,7 +74,7 @@ services:
       AUTH_TOKEN_URI: http://auth-server:9000/oauth2/token
       EUREKA_URL: http://eureka-server:8761/eureka/
       ACCOUNTS_URL: http://accounts:8082
- #     NOTIFICATIONS_URL: http://notifications:8083
+      NOTIFICATIONS_URL: http://notifications:8083
     depends_on:
       mysql:
         condition: service_healthy
@@ -84,8 +84,8 @@ services:
         condition: service_started
       accounts:
         condition: service_started
-   #   notifications:
-   #     condition: service_started
+      notifications:
+        condition: service_started
 
   gateway:
     build: ./gateway

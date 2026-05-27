@@ -39,7 +39,7 @@
 		<module>eureka-server</module>
 		<module>gateway</module>
 		<module>cash</module>
-	<!--	<module>notifications</module> -->
+		<module>notifications</module>
 	</modules>
 
 </project>
