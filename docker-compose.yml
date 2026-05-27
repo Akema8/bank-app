@@ -9,6 +9,7 @@ services:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD:-secret}"]
       interval: 10s
@@ -49,6 +50,42 @@ services:
         condition: service_started
       eureka-server:
         condition: service_started
+
+#  notifications:
+#    build: ./notifications
+#    ports:
+#      - "8083:8083"
+#    environment:
+#      AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
+#      EUREKA_URL: http://eureka-server:8761/eureka/
+#    depends_on:
+#      - auth-server
+#      - eureka-server
+
+  cash:
+    build: ./cash
+    ports:
+      - "8084:8084"
+    environment:
+      DB_URL: r2dbc:mysql://mysql:3306/cash
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+      AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
+      AUTH_TOKEN_URI: http://auth-server:9000/oauth2/token
+      EUREKA_URL: http://eureka-server:8761/eureka/
+      ACCOUNTS_URL: http://accounts:8082
+ #     NOTIFICATIONS_URL: http://notifications:8083
+    depends_on:
+      mysql:
+        condition: service_healthy
+      auth-server:
+        condition: service_started
+      eureka-server:
+        condition: service_started
+      accounts:
+        condition: service_started
+   #   notifications:
+   #     condition: service_started
 
   gateway:
     build: ./gateway
