@@ -1,6 +1,13 @@
 spring:
   application:
     name: auth-server
+  config:
+    import: "optional:zookeeper:"
+  cloud:
+    zookeeper:
+      connect-string: ${ZK_HOST:localhost:2181}
+      config:
+        enabled: true
 
 server:
   port: 9000
@@ -17,15 +24,6 @@ management:
       exposure:
         include: users
 
-auth:
-  issuer-uri: ${ISSUER_URI:http://localhost:9000}
-
-bank-web:
-  redirect-uri: ${BANK_WEB_REDIRECT_URI:http://localhost:8080/login/oauth2/code/bank-web}
-
 eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
   instance:
     prefer-ip-address: true

@@ -16,6 +16,22 @@ services:
       timeout: 5s
       retries: 10
 
+  zookeeper:
+    image: zookeeper:3.9
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_4LW_COMMANDS_WHITELIST: "ruok,stat,conf,mntr"
+
+  zk-init:
+    image: zookeeper:3.9
+    depends_on:
+      - zookeeper
+    volumes:
+      - ./zk-init:/zk-init:ro
+    entrypoint: ["sh", "/zk-init/seed.sh"]
+    restart: "no"
+
   eureka-server:
     build: ./eureka-server
     ports:
@@ -27,12 +43,13 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      ISSUER_URI: http://localhost:9000
-      BANK_WEB_REDIRECT_URI: http://localhost:8080/login/oauth2/code/bank-web
-      EUREKA_URL: http://eureka-server:8761/eureka/
+      ZK_HOST: zookeeper:2181
       LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: DEBUG
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
 
   accounts:
     build: ./accounts
@@ -42,8 +59,7 @@ services:
       DB_URL: r2dbc:mysql://mysql:3306/accounts
       DB_USERNAME: ${DB_USERNAME:-root}
       DB_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
-      AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
-      EUREKA_URL: http://eureka-server:8761/eureka/
+      ZK_HOST: zookeeper:2181
     depends_on:
       mysql:
         condition: service_healthy
@@ -51,17 +67,22 @@ services:
         condition: service_started
       eureka-server:
         condition: service_started
+      zk-init:
+        condition: service_completed_successfully
 
   notifications:
     build: ./notifications
     ports:
       - "8083:8083"
     environment:
-      AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
-      EUREKA_URL: http://eureka-server:8761/eureka/
+      ZK_HOST: zookeeper:2181
     depends_on:
-      - auth-server
-      - eureka-server
+      auth-server:
+        condition: service_started
+      eureka-server:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
 
   cash:
     build: ./cash
@@ -71,9 +92,7 @@ services:
       DB_URL: r2dbc:mysql://mysql:3306/cash
       DB_USERNAME: ${DB_USERNAME:-root}
       DB_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
-      AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
-      AUTH_TOKEN_URI: http://auth-server:9000/oauth2/token
-      EUREKA_URL: http://eureka-server:8761/eureka/
+      ZK_HOST: zookeeper:2181
     depends_on:
       mysql:
         condition: service_healthy
@@ -85,34 +104,38 @@ services:
         condition: service_started
       notifications:
         condition: service_started
+      zk-init:
+        condition: service_completed_successfully
 
   gateway:
     build: ./gateway
     ports:
       - "8090:8090"
     environment:
-      AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
-      EUREKA_URL: http://eureka-server:8761/eureka/
+      ZK_HOST: zookeeper:2181
     depends_on:
-      - eureka-server
-      - auth-server
+      eureka-server:
+        condition: service_started
+      auth-server:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
 
   bank-web:
     build: ./bank-web
     ports:
       - "8080:8080"
     environment:
-      GATEWAY_URL: http://gateway:8090
-      AUTH_URL: http://auth-server:9000
-      AUTH_AUTHORIZATION_URI: http://localhost:9000/oauth2/authorize
-      AUTH_TOKEN_URI: http://auth-server:9000/oauth2/token
-      AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
-      AUTH_USERINFO_URI: http://auth-server:9000/userinfo
+      ZK_HOST: zookeeper:2181
       LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: TRACE
       LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB_CLIENT: DEBUG
     depends_on:
-      - auth-server
-      - gateway
+      auth-server:
+        condition: service_started
+      gateway:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
 
 volumes:
   mysql_data:

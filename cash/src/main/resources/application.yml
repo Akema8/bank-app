@@ -1,15 +1,19 @@
 spring:
   application:
     name: cash
+  config:
+    import: "optional:zookeeper:"
+  cloud:
+    zookeeper:
+      connect-string: ${ZK_HOST:localhost:2181}
+      config:
+        enabled: true
   r2dbc:
     url: ${DB_URL:r2dbc:mysql://localhost:3306/cash}
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:}
   security:
     oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: ${AUTH_JWK_SET_URI:http://localhost:9000/oauth2/jwks}
       client:
         registration:
           cash-client:
@@ -17,9 +21,6 @@ spring:
             client-secret: cash-secret
             authorization-grant-type: client_credentials
             scope: accounts.write, notifications.write
-        provider:
-          cash-client:
-            token-uri: ${AUTH_TOKEN_URI:http://localhost:9000/oauth2/token}
 
 server:
   port: 8084
@@ -27,8 +28,5 @@ server:
     include-message: always
 
 eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
   instance:
     prefer-ip-address: true

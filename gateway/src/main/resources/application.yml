@@ -1,7 +1,13 @@
 spring:
   application:
     name: gateway
+  config:
+    import: "optional:zookeeper:"
   cloud:
+    zookeeper:
+      connect-string: ${ZK_HOST:localhost:2181}
+      config:
+        enabled: true
     gateway:
       server:
         webflux:
@@ -15,18 +21,9 @@ spring:
               predicates:
                 - Path=/cash/**
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: ${AUTH_JWK_SET_URI:http://localhost:9000/oauth2/jwks}
-
 server:
   port: 8090
 
 eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
   instance:
     prefer-ip-address: true

@@ -1,6 +1,13 @@
 spring:
   application:
     name: bank-web
+  config:
+    import: "optional:zookeeper:"
+  cloud:
+    zookeeper:
+      connect-string: ${ZK_HOST:localhost:2181}
+      config:
+        enabled: true
   security:
     oauth2:
       client:
@@ -13,10 +20,6 @@ spring:
             scope: openid, profile
         provider:
           bank-web:
-            authorization-uri: ${AUTH_AUTHORIZATION_URI:http://localhost:9000/oauth2/authorize}
-            token-uri: ${AUTH_TOKEN_URI:http://localhost:9000/oauth2/token}
-            jwk-set-uri: ${AUTH_JWK_SET_URI:http://localhost:9000/oauth2/jwks}
-            user-info-uri: ${AUTH_USERINFO_URI:http://localhost:9000/userinfo}
             user-name-attribute: sub
 
 server:
@@ -25,9 +28,3 @@ server:
     session:
       cookie:
         name: BANKWEBSESSIONID
-
-gateway:
-  url: ${GATEWAY_URL:http://localhost:8090}
-
-auth:
-  url: ${AUTH_URL:http://localhost:9000}
