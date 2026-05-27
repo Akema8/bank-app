@@ -1,6 +1,6 @@
 package ru.yandex.practicum.cash.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager;
@@ -28,21 +28,28 @@ public class WebClientConfig {
     }
 
     @Bean
-    WebClient accountsWebClient(@Value("${accounts.url}") String accountsUrl,
-                                ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
-        return buildClient(accountsUrl, authorizedClientManager);
+    @LoadBalanced
+    WebClient.Builder loadBalancedWebClientBuilder() {
+        return WebClient.builder();
     }
 
     @Bean
-    WebClient notificationsWebClient(@Value("${notifications.url}") String notificationsUrl,
-                                     ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
-        return buildClient(notificationsUrl, authorizedClientManager);
+    WebClient accountsWebClient(WebClient.Builder loadBalancedWebClientBuilder,
+                                ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
+        return buildClient("lb://accounts", loadBalancedWebClientBuilder, authorizedClientManager);
     }
 
-    private WebClient buildClient(String baseUrl, ReactiveOAuth2AuthorizedClientManager manager) {
+    @Bean
+    WebClient notificationsWebClient(WebClient.Builder loadBalancedWebClientBuilder,
+                                     ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
+        return buildClient("lb://notifications", loadBalancedWebClientBuilder, authorizedClientManager);
+    }
+
+    private WebClient buildClient(String baseUrl, WebClient.Builder builder,
+                                  ReactiveOAuth2AuthorizedClientManager manager) {
         var oauth2 = new ServerOAuth2AuthorizedClientExchangeFilterFunction(manager);
         oauth2.setDefaultClientRegistrationId("cash-client");
-        return WebClient.builder()
+        return builder.clone()
                 .baseUrl(baseUrl)
                 .filter(oauth2)
                 .build();

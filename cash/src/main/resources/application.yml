@@ -32,8 +32,3 @@ eureka:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
   instance:
     prefer-ip-address: true
-
-accounts:
-  url: ${ACCOUNTS_URL:http://localhost:8082}
-notifications:
-  url: ${NOTIFICATIONS_URL:http://localhost:8083}

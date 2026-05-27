@@ -29,6 +29,7 @@ services:
     environment:
       ISSUER_URI: http://localhost:9000
       BANK_WEB_REDIRECT_URI: http://localhost:8080/login/oauth2/code/bank-web
+      EUREKA_URL: http://eureka-server:8761/eureka/
       LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: DEBUG
     depends_on:
       - eureka-server
@@ -73,8 +74,6 @@ services:
       AUTH_JWK_SET_URI: http://auth-server:9000/oauth2/jwks
       AUTH_TOKEN_URI: http://auth-server:9000/oauth2/token
       EUREKA_URL: http://eureka-server:8761/eureka/
-      ACCOUNTS_URL: http://accounts:8082
-      NOTIFICATIONS_URL: http://notifications:8083
     depends_on:
       mysql:
         condition: service_healthy

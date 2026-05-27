@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.practicum.mybankfront.client.AccountsClient;
+import ru.yandex.practicum.mybankfront.client.CashClient;
 import ru.yandex.practicum.mybankfront.controller.dto.CashAction;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,6 +21,7 @@ import java.util.List;
 public class MainController {
 
     private final AccountsClient accountsClient;
+    private final CashClient cashClient;
 
     @GetMapping
     public String index() {
@@ -52,7 +55,16 @@ public class MainController {
             @RequestParam int value,
             @RequestParam CashAction action
     ) {
-        model.addAttribute("errors", List.of("Сервис Cash ещё не реализован"));
+        try {
+            BigDecimal amount = BigDecimal.valueOf(value);
+            if (action == CashAction.PUT) {
+                cashClient.deposit(amount);
+            } else {
+                cashClient.withdraw(amount);
+            }
+        } catch (Exception e) {
+            model.addAttribute("errors", List.of(e.getMessage()));
+        }
         return loadAccount(model, principal);
     }
 
