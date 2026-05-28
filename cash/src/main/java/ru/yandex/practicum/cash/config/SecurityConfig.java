@@ -14,7 +14,9 @@ public class SecurityConfig {
     @Bean
     SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
-                .authorizeExchange(auth -> auth.anyExchange().authenticated())
+                .authorizeExchange(auth -> auth
+                        .pathMatchers("/cash/**").hasAuthority("SCOPE_cash.write")
+                        .anyExchange().authenticated())
                 .oauth2ResourceServer(rs -> rs.jwt(Customizer.withDefaults()))
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .build();
