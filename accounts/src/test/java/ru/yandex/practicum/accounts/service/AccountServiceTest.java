@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import ru.yandex.practicum.accounts.client.NotificationsClient;
 import ru.yandex.practicum.accounts.dto.AccountDto;
 import ru.yandex.practicum.accounts.dto.AccountRegisterDto;
 import ru.yandex.practicum.accounts.dto.AccountUpdateDto;
@@ -28,6 +29,9 @@ class AccountServiceTest {
 
     @Mock
     private AccountRepository accountRepository;
+
+    @Mock
+    private NotificationsClient notificationsClient;
 
     @InjectMocks
     private AccountService accountService;

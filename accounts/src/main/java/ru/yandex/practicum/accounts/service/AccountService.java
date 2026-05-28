@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.accounts.client.NotificationsClient;
 import ru.yandex.practicum.accounts.dto.AccountDto;
 import ru.yandex.practicum.accounts.dto.AccountRegisterDto;
 import ru.yandex.practicum.accounts.dto.AccountShortDto;
@@ -21,6 +22,7 @@ import java.time.LocalDate;
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final NotificationsClient notificationsClient;
 
     public Mono<AccountDto> register(AccountRegisterDto dto) {
         return validateAge(dto.birthdate())
@@ -57,7 +59,9 @@ public class AccountService {
                     account.setBalance(account.getBalance().add(amount));
                     return accountRepository.save(account);
                 })
-                .map(this::toDto);
+                .map(this::toDto)
+                .flatMap(dto -> notificationsClient.notify(login, "Пополнение счёта: +" + amount)
+                        .thenReturn(dto));
     }
 
     public Mono<AccountDto> withdraw(String login, BigDecimal amount) {
@@ -70,7 +74,9 @@ public class AccountService {
                     account.setBalance(account.getBalance().subtract(amount));
                     return accountRepository.save(account);
                 })
-                .map(this::toDto);
+                .map(this::toDto)
+                .flatMap(dto -> notificationsClient.notify(login, "Снятие со счёта: -" + amount)
+                        .thenReturn(dto));
     }
 
     public Flux<AccountShortDto> getAll() {
