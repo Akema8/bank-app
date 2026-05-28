@@ -22,6 +22,8 @@ import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -155,5 +157,48 @@ class AccountServiceTest {
                     assertThat(dto.balance()).isEqualByComparingTo("1500.50");
                 })
                 .verifyComplete();
+    }
+
+    @Test
+    void deposit_success_updatesBalanceAndNotifies() {
+        Account account = new Account(1L, "user1", "Иван", ADULT_BIRTHDATE, new BigDecimal("100.00"));
+        Account saved = new Account(1L, "user1", "Иван", ADULT_BIRTHDATE, new BigDecimal("150.00"));
+
+        when(accountRepository.findByLogin("user1")).thenReturn(Mono.just(account));
+        when(accountRepository.save(any())).thenReturn(Mono.just(saved));
+        when(notificationsClient.notify(anyString(), anyString())).thenReturn(Mono.empty());
+
+        StepVerifier.create(accountService.deposit("user1", new BigDecimal("50.00")))
+                .assertNext(dto -> assertThat(dto.balance()).isEqualByComparingTo("150.00"))
+                .verifyComplete();
+
+        verify(notificationsClient).notify("user1", "Пополнение счёта: +50.00");
+    }
+
+    @Test
+    void withdraw_success_updatesBalanceAndNotifies() {
+        Account account = new Account(1L, "user1", "Иван", ADULT_BIRTHDATE, new BigDecimal("100.00"));
+        Account saved = new Account(1L, "user1", "Иван", ADULT_BIRTHDATE, new BigDecimal("60.00"));
+
+        when(accountRepository.findByLogin("user1")).thenReturn(Mono.just(account));
+        when(accountRepository.save(any())).thenReturn(Mono.just(saved));
+        when(notificationsClient.notify(anyString(), anyString())).thenReturn(Mono.empty());
+
+        StepVerifier.create(accountService.withdraw("user1", new BigDecimal("40.00")))
+                .assertNext(dto -> assertThat(dto.balance()).isEqualByComparingTo("60.00"))
+                .verifyComplete();
+
+        verify(notificationsClient).notify("user1", "Снятие со счёта: -40.00");
+    }
+
+    @Test
+    void withdraw_insufficientFunds_returnsBadRequest() {
+        Account account = new Account(1L, "user1", "Иван", ADULT_BIRTHDATE, new BigDecimal("30.00"));
+        when(accountRepository.findByLogin("user1")).thenReturn(Mono.just(account));
+
+        StepVerifier.create(accountService.withdraw("user1", new BigDecimal("100.00")))
+                .expectErrorMatches(ex -> ex instanceof ResponseStatusException rse
+                        && rse.getStatusCode() == HttpStatus.BAD_REQUEST)
+                .verify();
     }
 }
