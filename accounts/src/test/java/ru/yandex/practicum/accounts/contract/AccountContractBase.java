@@ -6,11 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.accounts.TestContainersConfig;
 import ru.yandex.practicum.accounts.client.NotificationsClient;
@@ -26,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
-@Testcontainers
 @TestPropertySource(properties = {
         "spring.config.import=",
         "eureka.client.enabled=false"
@@ -40,7 +38,7 @@ public abstract class AccountContractBase extends TestContainersConfig {
     AccountRepository accountRepository;
 
     @MockitoBean
-    JwtDecoder jwtDecoder;
+    ReactiveJwtDecoder jwtDecoder;
 
     @MockitoBean
     NotificationsClient notificationsClient;
@@ -54,7 +52,7 @@ public abstract class AccountContractBase extends TestContainersConfig {
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .build();
-        when(jwtDecoder.decode(anyString())).thenReturn(jwt);
+        when(jwtDecoder.decode(anyString())).thenReturn(Mono.just(jwt));
         when(notificationsClient.notify(anyString(), anyString())).thenReturn(Mono.empty());
 
         accountRepository.deleteAll()

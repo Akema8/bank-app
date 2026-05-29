@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -13,12 +12,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.yandex.practicum.cash.TestContainersConfig;
 import ru.yandex.practicum.cash.repository.CashTransactionRepository;
 
@@ -30,8 +29,8 @@ import static org.springframework.security.test.web.reactive.server.SecurityMock
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
-@Testcontainers
-@AutoConfigureWireMock(port = 0)
+@AutoConfigureWireMock(port = 9551)
+@ActiveProfiles("test")
 @Import(CashControllerIT.TestWebClientConfig.class)
 @TestPropertySource(properties = {
         "spring.config.import=",
@@ -42,13 +41,13 @@ class CashControllerIT extends TestContainersConfig {
     @TestConfiguration
     static class TestWebClientConfig {
         @Bean
-        WebClient accountsWebClient(@Value("${wiremock.server.port}") int port) {
-            return WebClient.builder().baseUrl("http://localhost:" + port).build();
+        WebClient accountsWebClient() {
+            return WebClient.builder().baseUrl("http://localhost:9551").build();
         }
 
         @Bean
-        WebClient notificationsWebClient(@Value("${wiremock.server.port}") int port) {
-            return WebClient.builder().baseUrl("http://localhost:" + port).build();
+        WebClient notificationsWebClient() {
+            return WebClient.builder().baseUrl("http://localhost:9551").build();
         }
     }
 
@@ -59,7 +58,7 @@ class CashControllerIT extends TestContainersConfig {
     CashTransactionRepository repository;
 
     @MockitoBean
-    JwtDecoder jwtDecoder;
+    ReactiveJwtDecoder jwtDecoder;
 
     private static final String ACCOUNT_RESPONSE = """
             {"id":1,"login":"user1","name":"Иван","birthdate":"1990-01-01","balance":600.00}

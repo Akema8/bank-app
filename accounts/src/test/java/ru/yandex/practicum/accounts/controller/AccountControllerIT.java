@@ -7,11 +7,10 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.accounts.TestContainersConfig;
 import ru.yandex.practicum.accounts.client.NotificationsClient;
@@ -25,7 +24,6 @@ import static org.springframework.security.test.web.reactive.server.SecurityMock
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
-@Testcontainers
 @TestPropertySource(properties = {
         "spring.config.import=",
         "eureka.client.enabled=false"
@@ -39,7 +37,7 @@ class AccountControllerIT extends TestContainersConfig {
     AccountRepository accountRepository;
 
     @MockitoBean
-    JwtDecoder jwtDecoder;
+    ReactiveJwtDecoder jwtDecoder;
 
     @MockitoBean
     NotificationsClient notificationsClient;
@@ -96,17 +94,13 @@ class AccountControllerIT extends TestContainersConfig {
 
     @Test
     void getMe_authenticated_returnsAccount() {
-        accountRepository.deleteAll()
-                .then(webTestClient.post().uri("/accounts/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue("""
-                                {"login":"carol","name":"Carol","birthdate":"1990-01-01"}
-                                """)
-                        .exchange()
-                        .returnResult(Void.class)
-                        .getResponseBody()
-                        .then())
-                .block();
+        webTestClient.post().uri("/accounts/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("""
+                        {"login":"carol","name":"Carol","birthdate":"1990-01-01"}
+                        """)
+                .exchange()
+                .expectStatus().isCreated();
 
         webTestClient.mutateWith(mockJwt().jwt(j -> j.subject("carol")))
                 .get().uri("/accounts/me")

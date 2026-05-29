@@ -9,11 +9,10 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.test.StepVerifier;
 import ru.yandex.practicum.accounts.TestContainersConfig;
 import ru.yandex.practicum.accounts.client.NotificationsClient;
@@ -21,12 +20,12 @@ import ru.yandex.practicum.accounts.client.NotificationsClient;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @SpringBootTest
-@Testcontainers
 @AutoConfigureWireMock(port = 0)
 @Import(NotificationsConsumerIT.WireMockWebClientConfig.class)
 @TestPropertySource(properties = {
         "spring.config.import=",
-        "eureka.client.enabled=false"
+        "eureka.client.enabled=false",
+        "spring.main.allow-bean-definition-overriding=true"
 })
 class NotificationsConsumerIT extends TestContainersConfig {
 
@@ -34,7 +33,7 @@ class NotificationsConsumerIT extends TestContainersConfig {
     NotificationsClient notificationsClient;
 
     @MockitoBean
-    JwtDecoder jwtDecoder;
+    ReactiveJwtDecoder jwtDecoder;
 
     @TestConfiguration
     static class WireMockWebClientConfig {

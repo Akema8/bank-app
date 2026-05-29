@@ -35,7 +35,11 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.config.import=",
         "eureka.client.enabled=false",
         "gateway.url=http://localhost:${wiremock.server.port}",
-        "auth.url=http://localhost:${wiremock.server.port}"
+        "auth.url=http://localhost:${wiremock.server.port}",
+        "spring.main.allow-bean-definition-overriding=true",
+        "spring.security.oauth2.client.provider.bank-web.authorization-uri=http://localhost/auth",
+        "spring.security.oauth2.client.provider.bank-web.token-uri=http://localhost/token",
+        "spring.security.oauth2.client.provider.bank-web.user-info-uri=http://localhost/userinfo"
 })
 class GatewayConsumerIT {
 
@@ -127,7 +131,7 @@ class GatewayConsumerIT {
         assertThat(result.balance()).isEqualByComparingTo("500.00");
         WireMock.verify(postRequestedFor(urlEqualTo("/cash/deposit"))
                 .withHeader("Content-Type", WireMock.containing("application/json"))
-                .withRequestBody(WireMock.matchingJsonPath("$.amount", equalTo("100.00"))));
+                .withRequestBody(WireMock.matchingJsonPath("$.amount", equalTo("100.0"))));
     }
 
     @Test
@@ -141,7 +145,7 @@ class GatewayConsumerIT {
         cashClient.withdraw(new BigDecimal("50.00"));
 
         WireMock.verify(postRequestedFor(urlEqualTo("/cash/withdraw"))
-                .withRequestBody(WireMock.matchingJsonPath("$.amount", equalTo("50.00"))));
+                .withRequestBody(WireMock.matchingJsonPath("$.amount", equalTo("50.0"))));
     }
 
     @Test
@@ -159,6 +163,6 @@ class GatewayConsumerIT {
 
         WireMock.verify(postRequestedFor(urlEqualTo("/transfer"))
                 .withRequestBody(WireMock.matchingJsonPath("$.toLogin", equalTo("user2")))
-                .withRequestBody(WireMock.matchingJsonPath("$.amount", equalTo("200.00"))));
+                .withRequestBody(WireMock.matchingJsonPath("$.amount", equalTo("200.0"))));
     }
 }

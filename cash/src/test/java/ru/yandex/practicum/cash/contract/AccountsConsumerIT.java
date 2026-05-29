@@ -3,17 +3,16 @@ package ru.yandex.practicum.cash.contract;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.test.StepVerifier;
 import ru.yandex.practicum.cash.TestContainersConfig;
 import ru.yandex.practicum.cash.dto.AccountDto;
@@ -31,8 +30,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@Testcontainers
-@AutoConfigureWireMock(port = 0)
+@AutoConfigureWireMock(port = 9552)
+@ActiveProfiles("test")
 @Import(AccountsConsumerIT.TestWebClientConfig.class)
 @TestPropertySource(properties = {
         "spring.config.import=",
@@ -43,13 +42,13 @@ class AccountsConsumerIT extends TestContainersConfig {
     @TestConfiguration
     static class TestWebClientConfig {
         @Bean
-        WebClient accountsWebClient(@Value("${wiremock.server.port}") int port) {
-            return WebClient.builder().baseUrl("http://localhost:" + port).build();
+        WebClient accountsWebClient() {
+            return WebClient.builder().baseUrl("http://localhost:9552").build();
         }
 
         @Bean
-        WebClient notificationsWebClient(@Value("${wiremock.server.port}") int port) {
-            return WebClient.builder().baseUrl("http://localhost:" + port).build();
+        WebClient notificationsWebClient() {
+            return WebClient.builder().baseUrl("http://localhost:9552").build();
         }
     }
 
@@ -57,7 +56,7 @@ class AccountsConsumerIT extends TestContainersConfig {
     CashService cashService;
 
     @MockitoBean
-    JwtDecoder jwtDecoder;
+    ReactiveJwtDecoder jwtDecoder;
 
     @Test
     void deposit_matchesAccountsContract_sendsCorrectRequest() {
@@ -84,6 +83,6 @@ class AccountsConsumerIT extends TestContainersConfig {
 
         WireMock.verify(postRequestedFor(urlEqualTo("/accounts/user1/deposit"))
                 .withHeader("Content-Type", WireMock.containing("application/json"))
-                .withRequestBody(WireMock.matchingJsonPath("$.amount", WireMock.equalTo("100.00"))));
+                .withRequestBody(WireMock.matchingJsonPath("$.amount", WireMock.equalTo("100.0"))));
     }
 }
