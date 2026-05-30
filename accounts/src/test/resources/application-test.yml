@@ -1,0 +1,8 @@
+spring:
+  r2dbc:
+    init: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://placeholder.invalid/jwks

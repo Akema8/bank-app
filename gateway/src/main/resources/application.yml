@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: gateway
+  config:
+    import: "optional:zookeeper:"
+  cloud:
+    zookeeper:
+      connect-string: ${ZK_HOST:localhost:2181}
+      config:
+        enabled: true
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: accounts
+              uri: lb://accounts
+              predicates:
+                - Path=/accounts/**
+            - id: cash
+              uri: lb://cash
+              predicates:
+                - Path=/cash/**
+            - id: transfer
+              uri: lb://transfer
+              predicates:
+                - Path=/transfer/**
+
+server:
+  port: 8090
+
+eureka:
+  instance:
+    prefer-ip-address: true

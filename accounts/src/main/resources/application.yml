@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: accounts
+  config:
+    import: "optional:zookeeper:"
+  cloud:
+    zookeeper:
+      connect-string: ${ZK_HOST:localhost:2181}
+      config:
+        enabled: true
+  r2dbc:
+    url: ${DB_URL:r2dbc:mysql://localhost:3306/accounts}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+  security:
+    oauth2:
+      client:
+        registration:
+          accounts-client:
+            client-id: accounts-client
+            client-secret: accounts-secret
+            authorization-grant-type: client_credentials
+            scope: notifications.write
+
+server:
+  port: 8082
+  error:
+    include-message: always
+
+eureka:
+  instance:
+    prefer-ip-address: true

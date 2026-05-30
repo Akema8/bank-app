@@ -1,0 +1,163 @@
+services:
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD:-secret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  zookeeper:
+    image: zookeeper:3.9
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_4LW_COMMANDS_WHITELIST: "ruok,stat,conf,mntr"
+
+  zk-init:
+    image: zookeeper:3.9
+    depends_on:
+      - zookeeper
+    volumes:
+      - ./zk-init:/zk-init:ro
+    entrypoint: ["sh", "/zk-init/seed.sh"]
+    restart: "no"
+
+  eureka-server:
+    build: ./eureka-server
+    ports:
+      - "8761:8761"
+
+  auth-server:
+    build: ./auth-server
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      ZK_HOST: zookeeper:2181
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: DEBUG
+    depends_on:
+      eureka-server:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
+
+  accounts:
+    build: ./accounts
+    ports:
+      - "8082:8082"
+    environment:
+      DB_URL: r2dbc:mysql://mysql:3306/accounts
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+      ZK_HOST: zookeeper:2181
+    depends_on:
+      mysql:
+        condition: service_healthy
+      auth-server:
+        condition: service_started
+      eureka-server:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
+
+  notifications:
+    build: ./notifications
+    ports:
+      - "8083:8083"
+    environment:
+      ZK_HOST: zookeeper:2181
+    depends_on:
+      auth-server:
+        condition: service_started
+      eureka-server:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
+
+  cash:
+    build: ./cash
+    ports:
+      - "8084:8084"
+    environment:
+      DB_URL: r2dbc:mysql://mysql:3306/cash
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+      ZK_HOST: zookeeper:2181
+    depends_on:
+      mysql:
+        condition: service_healthy
+      auth-server:
+        condition: service_started
+      eureka-server:
+        condition: service_started
+      accounts:
+        condition: service_started
+      notifications:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
+
+  transfer:
+    build: ./transfer
+    ports:
+      - "8085:8085"
+    environment:
+      DB_URL: r2dbc:mysql://mysql:3306/transfer
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+      ZK_HOST: zookeeper:2181
+    depends_on:
+      mysql:
+        condition: service_healthy
+      auth-server:
+        condition: service_started
+      eureka-server:
+        condition: service_started
+      accounts:
+        condition: service_started
+      notifications:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
+
+  gateway:
+    build: ./gateway
+    ports:
+      - "8090:8090"
+    environment:
+      ZK_HOST: zookeeper:2181
+    depends_on:
+      eureka-server:
+        condition: service_started
+      auth-server:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
+
+  bank-web:
+    build: ./bank-web
+    ports:
+      - "8080:8080"
+    environment:
+      ZK_HOST: zookeeper:2181
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: TRACE
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB_CLIENT: DEBUG
+    depends_on:
+      auth-server:
+        condition: service_started
+      gateway:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
+
+volumes:
+  mysql_data:

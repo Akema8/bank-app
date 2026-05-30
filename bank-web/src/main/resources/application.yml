@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: bank-web
+  config:
+    import: "optional:zookeeper:"
+  cloud:
+    zookeeper:
+      connect-string: ${ZK_HOST:localhost:2181}
+      config:
+        enabled: true
+  security:
+    oauth2:
+      client:
+        registration:
+          bank-web:
+            client-id: bank-web-client
+            client-secret: bank-web-secret
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid, profile, cash.write, transfer.write
+        provider:
+          bank-web:
+            user-name-attribute: sub
+
+server:
+  port: 8080
+  servlet:
+    session:
+      cookie:
+        name: BANKWEBSESSIONID

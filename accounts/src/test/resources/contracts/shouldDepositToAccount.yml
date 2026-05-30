@@ -1,0 +1,31 @@
+description: "POST /accounts/{login}/deposit с SCOPE_accounts.write обновляет баланс"
+
+request:
+  method: POST
+  url: /accounts/user1/deposit
+  headers:
+    Content-Type: application/json
+    Authorization: Bearer test-token
+  body:
+    amount: 100.00
+  matchers:
+    body:
+      - path: $.amount
+        type: by_regex
+        value: "[0-9]+\\.?[0-9]*"
+
+response:
+  status: 200
+  headers:
+    Content-Type: application/json
+  body:
+    login: user1
+    balance: 600.00
+  matchers:
+    body:
+      - path: $.login
+        type: by_regex
+        value: "[a-zA-Z0-9_]+"
+      - path: $.balance
+        type: by_regex
+        value: "[0-9]+\\.?[0-9]*"

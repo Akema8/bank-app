@@ -1,0 +1,35 @@
+description: "POST /transfer с SCOPE_transfer.write переводит деньги и возвращает AccountDto отправителя"
+
+request:
+  method: POST
+  url: /transfer
+  headers:
+    Content-Type: application/json
+    Authorization: Bearer test-token
+  body:
+    toLogin: recipient
+    amount: 100.00
+  matchers:
+    body:
+      - path: $.toLogin
+        type: by_regex
+        value: "[a-zA-Z0-9_]+"
+      - path: $.amount
+        type: by_regex
+        value: "[0-9]+\\.?[0-9]*"
+
+response:
+  status: 200
+  headers:
+    Content-Type: application/json
+  body:
+    login: sender
+    balance: 400.00
+  matchers:
+    body:
+      - path: $.login
+        type: by_regex
+        value: "[a-zA-Z0-9_]+"
+      - path: $.balance
+        type: by_regex
+        value: "[0-9]+\\.?[0-9]*"

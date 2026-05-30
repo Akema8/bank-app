@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: notifications
+  config:
+    import: "optional:zookeeper:"
+  cloud:
+    zookeeper:
+      connect-string: ${ZK_HOST:localhost:2181}
+      config:
+        enabled: true
+
+server:
+  port: 8083
+  error:
+    include-message: always
+
+eureka:
+  instance:
+    prefer-ip-address: true
