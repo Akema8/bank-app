@@ -8,24 +8,32 @@ dependencies:
   - name: mysql
     version: "0.1.0"
     repository: "file://charts/mysql"
+    condition: mysql.enabled
   - name: auth-server
     version: "0.1.0"
     repository: "file://charts/auth-server"
+    condition: auth-server.enabled
   - name: accounts
     version: "0.1.0"
     repository: "file://charts/accounts"
+    condition: accounts.enabled
   - name: cash
     version: "0.1.0"
     repository: "file://charts/cash"
+    condition: cash.enabled
   - name: transfer
     version: "0.1.0"
     repository: "file://charts/transfer"
+    condition: transfer.enabled
   - name: notifications
     version: "0.1.0"
     repository: "file://charts/notifications"
+    condition: notifications.enabled
   - name: gateway
     version: "0.1.0"
     repository: "file://charts/gateway"
+    condition: gateway.enabled
   - name: bank-web
     version: "0.1.0"
     repository: "file://charts/bank-web"
+    condition: bank-web.enabled

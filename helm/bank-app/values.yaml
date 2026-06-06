@@ -1,30 +1,45 @@
-global:
-  imagePullPolicy: Never
-  imageTag: latest
-
+# MySQL
 mysql:
-  rootPassword: secret
+  enabled: true
+  rootPassword: secret        # ← меняй здесь; синхронизируй с *.db.password ниже
 
+# Auth Server
+# nodePort          = порт для браузера (authorization-uri, issuer)
+# issuerUri         = должен совпадать с nodePort
+# redirectUri       = должен совпадать с bank-web.service.nodePort
 auth-server:
-  nodePort: 30900
+  enabled: true
+  service:
+    nodePort: 30900
   issuerUri: "http://localhost:30900"
   redirectUri: "http://localhost:30800/login/oauth2/code/bank-web"
 
+# Backend сервисы
 accounts:
-  replicaCount: 1
+  enabled: true
+  db:
+    password: secret
 
 cash:
-  replicaCount: 1
+  enabled: true
+  db:
+    password: secret
 
 transfer:
-  replicaCount: 1
+  enabled: true
+  db:
+    password: secret
 
 notifications:
-  replicaCount: 1
+  enabled: true
 
 gateway:
-  replicaCount: 1
+  enabled: true
 
+# Frontend
 bank-web:
-  nodePort: 30800
-  replicaCount: 1
+  enabled: true
+  service:
+    nodePort: 30800
+  authServer:
+    externalUri: "http://localhost:30900"
