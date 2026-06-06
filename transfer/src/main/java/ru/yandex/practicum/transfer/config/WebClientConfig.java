@@ -1,6 +1,6 @@
 package ru.yandex.practicum.transfer.config;
 
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -29,23 +29,24 @@ public class WebClientConfig {
     }
 
     @Bean
-    @LoadBalanced
-    WebClient.Builder loadBalancedWebClientBuilder() {
+    WebClient.Builder webClientBuilder() {
         return WebClient.builder();
     }
 
     @Bean
     @Profile("!test")
-    WebClient accountsWebClient(WebClient.Builder loadBalancedWebClientBuilder,
-                                ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
-        return buildClient("lb://accounts", loadBalancedWebClientBuilder, authorizedClientManager);
+    WebClient accountsWebClient(WebClient.Builder webClientBuilder,
+                                ReactiveOAuth2AuthorizedClientManager authorizedClientManager,
+                                @Value("${accounts.url:http://accounts:8082}") String accountsUrl) {
+        return buildClient(accountsUrl, webClientBuilder, authorizedClientManager);
     }
 
     @Bean
     @Profile("!test")
-    WebClient notificationsWebClient(WebClient.Builder loadBalancedWebClientBuilder,
-                                     ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
-        return buildClient("lb://notifications", loadBalancedWebClientBuilder, authorizedClientManager);
+    WebClient notificationsWebClient(WebClient.Builder webClientBuilder,
+                                     ReactiveOAuth2AuthorizedClientManager authorizedClientManager,
+                                     @Value("${notifications.url:http://notifications:8083}") String notificationsUrl) {
+        return buildClient(notificationsUrl, webClientBuilder, authorizedClientManager);
     }
 
     private WebClient buildClient(String baseUrl, WebClient.Builder builder,
