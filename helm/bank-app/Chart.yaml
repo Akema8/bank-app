@@ -1,0 +1,31 @@
+apiVersion: v2
+name: bank-app
+description: Bank application chart
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+dependencies:
+  - name: mysql
+    version: "0.1.0"
+    repository: "file://charts/mysql"
+  - name: auth-server
+    version: "0.1.0"
+    repository: "file://charts/auth-server"
+  - name: accounts
+    version: "0.1.0"
+    repository: "file://charts/accounts"
+  - name: cash
+    version: "0.1.0"
+    repository: "file://charts/cash"
+  - name: transfer
+    version: "0.1.0"
+    repository: "file://charts/transfer"
+  - name: notifications
+    version: "0.1.0"
+    repository: "file://charts/notifications"
+  - name: gateway
+    version: "0.1.0"
+    repository: "file://charts/gateway"
+  - name: bank-web
+    version: "0.1.0"
+    repository: "file://charts/bank-web"

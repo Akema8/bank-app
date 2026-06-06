@@ -1,0 +1,14 @@
+image:
+  repository: bank-app/cash
+  pullPolicy: Never
+  tag: latest
+
+replicaCount: 1
+
+service:
+  port: 8084
+
+db:
+  url: "r2dbc:mysql://mysql:3306/cash"
+  username: root
+  password: secret
