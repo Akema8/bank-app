@@ -16,6 +16,7 @@ public class SecurityConfig {
     SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .authorizeExchange(auth -> auth
+                        .pathMatchers("/actuator/health").permitAll()
                         .pathMatchers(HttpMethod.POST, "/accounts/register").permitAll()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(rs -> rs.jwt(Customizer.withDefaults()))

@@ -4,9 +4,6 @@ mysql:
   rootPassword: secret        # ← меняй здесь; синхронизируй с *.db.password ниже
 
 # Auth Server
-# nodePort          = порт для браузера (authorization-uri, issuer)
-# issuerUri         = должен совпадать с nodePort
-# redirectUri       = должен совпадать с bank-web.service.nodePort
 auth-server:
   enabled: true
   service:

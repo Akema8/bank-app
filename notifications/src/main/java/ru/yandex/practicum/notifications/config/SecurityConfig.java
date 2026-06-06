@@ -16,6 +16,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/notifications").hasAuthority("SCOPE_notifications.write")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(rs -> rs.jwt(Customizer.withDefaults()))
