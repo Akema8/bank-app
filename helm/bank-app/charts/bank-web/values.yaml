@@ -8,3 +8,10 @@ replicaCount: 1
 service:
   port: 8080
   nodePort: 30800
+
+authServer:
+  externalUri: "http://localhost:30900"
+  internalUri: "http://auth-server:9000"
+
+gateway:
+  url: "http://gateway:8090"

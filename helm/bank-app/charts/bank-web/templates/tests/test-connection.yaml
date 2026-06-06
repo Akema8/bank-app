@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "bank-web.name" . }}-test-connection"
+  labels:
+    {{- include "bank-web.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  restartPolicy: Never
+  containers:
+    - name: test
+      image: curlimages/curl:latest
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          curl -sf http://{{ include "bank-web.name" . }}:{{ .Values.service.port }}/register \
+            | grep -qi "register"
