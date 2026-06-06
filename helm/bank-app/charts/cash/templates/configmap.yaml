@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "cash.name" . }}
+  labels:
+    {{- include "cash.labels" . | nindent 4 }}
+data:
+  EUREKA_CLIENT_ENABLED: "false"
+  SPRING_CLOUD_ZOOKEEPER_ENABLED: "false"
+  DB_URL: {{ .Values.db.url | quote }}
+  DB_USERNAME: {{ .Values.db.username | quote }}
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "http://auth-server:9000/oauth2/jwks"
+  SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_CASH_CLIENT_TOKEN_URI: "http://auth-server:9000/oauth2/token"
