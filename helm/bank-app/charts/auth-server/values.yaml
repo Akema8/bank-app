@@ -1,6 +1,6 @@
 image:
   repository: bank-app/auth-server
-  pullPolicy: Never
+  pullPolicy: IfNotPresent
   tag: latest
 
 replicaCount: 1

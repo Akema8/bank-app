@@ -1,6 +1,6 @@
 package ru.yandex.practicum.accounts.config;
 
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager;
@@ -28,18 +28,18 @@ public class WebClientConfig {
     }
 
     @Bean
-    @LoadBalanced
-    WebClient.Builder loadBalancedWebClientBuilder() {
+    WebClient.Builder webClientBuilder() {
         return WebClient.builder();
     }
 
     @Bean
-    WebClient notificationsWebClient(WebClient.Builder loadBalancedWebClientBuilder,
-                                     ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
+    WebClient notificationsWebClient(WebClient.Builder webClientBuilder,
+                                     ReactiveOAuth2AuthorizedClientManager authorizedClientManager,
+                                     @Value("${notifications.url:http://notifications:8083}") String notificationsUrl) {
         var oauth2 = new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
         oauth2.setDefaultClientRegistrationId("accounts-client");
-        return loadBalancedWebClientBuilder.clone()
-                .baseUrl("lb://notifications")
+        return webClientBuilder.clone()
+                .baseUrl(notificationsUrl)
                 .filter(oauth2)
                 .build();
     }
