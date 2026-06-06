@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mysql.name" . }}-init
+  labels:
+    {{- include "mysql.labels" . | nindent 4 }}
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS accounts;
+    CREATE DATABASE IF NOT EXISTS cash;
+    CREATE DATABASE IF NOT EXISTS transfer;
