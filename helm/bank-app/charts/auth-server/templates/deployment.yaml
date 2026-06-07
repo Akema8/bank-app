@@ -34,7 +34,8 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 6
           livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: /actuator/health/liveness
               port: http
             initialDelaySeconds: 60
             periodSeconds: 15

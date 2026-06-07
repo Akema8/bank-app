@@ -28,14 +28,16 @@ spec:
             - secretRef:
                 name: {{ include "cash.name" . }}
           readinessProbe:
-            tcpSocket:
+            httpGet:
+              path: /actuator/health/readiness
               port: http
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 6
           livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: /actuator/health/liveness
               port: http
             initialDelaySeconds: 60
             periodSeconds: 15
