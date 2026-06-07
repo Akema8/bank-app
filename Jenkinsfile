@@ -28,7 +28,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'chmod +x mvnw && ./mvnw clean package -DskipTests'
+                bat 'mvnw.cmd clean package -DskipTests'
             }
         }
 
@@ -41,16 +41,11 @@ pipeline {
                     env.REPO_PREFIX = repoPrefix
 
                     def services = [
-                        'accounts',
-                        'auth-server',
-                        'bank-web',
-                        'cash',
-                        'gateway',
-                        'notifications',
-                        'transfer'
+                        'accounts', 'auth-server', 'bank-web', 'cash',
+                        'gateway', 'notifications', 'transfer'
                     ]
                     for (svc in services) {
-                        sh "docker build -t '${repoPrefix}${svc}:${tag}' './${svc}'"
+                        bat "docker build -t ${repoPrefix}${svc}:${tag} .\\${svc}"
                     }
                 }
             }
@@ -63,16 +58,11 @@ pipeline {
             steps {
                 script {
                     def services = [
-                        'accounts',
-                        'auth-server',
-                        'bank-web',
-                        'cash',
-                        'gateway',
-                        'notifications',
-                        'transfer'
+                        'accounts', 'auth-server', 'bank-web', 'cash',
+                        'gateway', 'notifications', 'transfer'
                     ]
                     for (svc in services) {
-                        sh "docker push '${env.REPO_PREFIX}${svc}:${env.TAG}'"
+                        bat "docker push ${env.REPO_PREFIX}${svc}:${env.TAG}"
                     }
                 }
             }
@@ -83,27 +73,27 @@ pipeline {
                 script {
                     def tag    = env.TAG
                     def prefix = env.REPO_PREFIX
-                    sh """
-                        helm dependency update helm/bank-app
-                        helm upgrade --install '${params.HELM_RELEASE}' helm/bank-app \
-                            --namespace '${params.K8S_NAMESPACE}' \
-                            --create-namespace \
-                            --set "accounts.image.tag=${tag}" \
-                            --set "accounts.image.repository=${prefix}accounts" \
-                            --set "auth-server.image.tag=${tag}" \
-                            --set "auth-server.image.repository=${prefix}auth-server" \
-                            --set "bank-web.image.tag=${tag}" \
-                            --set "bank-web.image.repository=${prefix}bank-web" \
-                            --set "cash.image.tag=${tag}" \
-                            --set "cash.image.repository=${prefix}cash" \
-                            --set "gateway.image.tag=${tag}" \
-                            --set "gateway.image.repository=${prefix}gateway" \
-                            --set "notifications.image.tag=${tag}" \
-                            --set "notifications.image.repository=${prefix}notifications" \
-                            --set "transfer.image.tag=${tag}" \
-                            --set "transfer.image.repository=${prefix}transfer" \
-                            --wait --timeout 5m
-                    """
+
+                    bat 'helm dependency update helm/bank-app'
+
+                    def setArgs = [
+                        "accounts.image.tag=${tag}",
+                        "accounts.image.repository=${prefix}accounts",
+                        "auth-server.image.tag=${tag}",
+                        "auth-server.image.repository=${prefix}auth-server",
+                        "bank-web.image.tag=${tag}",
+                        "bank-web.image.repository=${prefix}bank-web",
+                        "cash.image.tag=${tag}",
+                        "cash.image.repository=${prefix}cash",
+                        "gateway.image.tag=${tag}",
+                        "gateway.image.repository=${prefix}gateway",
+                        "notifications.image.tag=${tag}",
+                        "notifications.image.repository=${prefix}notifications",
+                        "transfer.image.tag=${tag}",
+                        "transfer.image.repository=${prefix}transfer",
+                    ].collect { "--set ${it}" }.join(' ')
+
+                    bat "helm upgrade --install ${params.HELM_RELEASE} helm/bank-app --namespace ${params.K8S_NAMESPACE} --create-namespace ${setArgs} --wait --timeout 5m"
                 }
             }
         }
