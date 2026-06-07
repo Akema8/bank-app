@@ -29,7 +29,7 @@ public class SecurityConfig {
     SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .authorizeExchange(auth -> auth
-                        .pathMatchers("/actuator/health").permitAll()
+                        .pathMatchers("/actuator/health/**").permitAll()
                         .pathMatchers(HttpMethod.POST, "/accounts/register").permitAll()
                         .pathMatchers(HttpMethod.POST, "/accounts/*/deposit", "/accounts/*/withdraw")
                                 .hasAuthority("SCOPE_accounts.write")

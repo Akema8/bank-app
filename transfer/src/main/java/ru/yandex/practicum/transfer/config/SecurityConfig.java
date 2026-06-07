@@ -15,7 +15,7 @@ public class SecurityConfig {
     SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .authorizeExchange(auth -> auth
-                        .pathMatchers("/actuator/health").permitAll()
+                        .pathMatchers("/actuator/health/**").permitAll()
                         .pathMatchers("/transfer/**").hasAuthority("SCOPE_transfer.write")
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(rs -> rs.jwt(Customizer.withDefaults()))

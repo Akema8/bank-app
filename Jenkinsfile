@@ -40,12 +40,17 @@ pipeline {
                     env.TAG        = tag
                     env.REPO_PREFIX = repoPrefix
 
+                    def isLocal = !(params.REGISTRY?.trim())
+
                     def services = [
                         'accounts', 'auth-server', 'bank-web', 'cash',
                         'gateway', 'notifications', 'transfer'
                     ]
                     for (svc in services) {
-                        bat "docker build -t ${repoPrefix}${svc}:${tag} .\\${svc}"
+                        bat "docker build --provenance=false -t ${repoPrefix}${svc}:${tag} .\\${svc}"
+                        if (isLocal) {
+                            bat "docker save ${repoPrefix}${svc}:${tag} | wsl -d rancher-desktop docker load"
+                        }
                     }
                 }
             }
@@ -93,7 +98,7 @@ pipeline {
                         "transfer.image.repository=${prefix}transfer",
                     ].collect { "--set ${it}" }.join(' ')
 
-                    bat "helm upgrade --install ${params.HELM_RELEASE} helm/bank-app --namespace ${params.K8S_NAMESPACE} --create-namespace ${setArgs} --wait --timeout 5m"
+                    bat "helm upgrade --install ${params.HELM_RELEASE} helm/bank-app --namespace ${params.K8S_NAMESPACE} --create-namespace ${setArgs} --wait --timeout 10m"
                 }
             }
         }
