@@ -8,12 +8,23 @@ spring:
       connect-string: ${ZK_HOST:localhost:2181}
       config:
         enabled: true
+  kafka:
+    consumer:
+      group-id: notifications-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: "ru.yandex.practicum.notifications.dto.NotificationEvent"
 
 server:
   port: 8083
-  error:
-    include-message: always
 
 eureka:
   instance:
     prefer-ip-address: true
+
+kafka:
+  topic:
+    notifications: notifications
