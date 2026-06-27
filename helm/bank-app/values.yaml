@@ -11,24 +11,36 @@ auth-server:
   issuerUri: "http://localhost:30900"
   redirectUri: "http://localhost:30800/login/oauth2/code/bank-web"
 
+# Kafka
+kafka:
+  enabled: true
+
 # Backend сервисы
 accounts:
   enabled: true
   db:
     password: secret
+  kafka:
+    bootstrapServers: "kafka:9092"
 
 cash:
   enabled: true
   db:
     password: secret
+  kafka:
+    bootstrapServers: "kafka:9092"
 
 transfer:
   enabled: true
   db:
     password: secret
+  kafka:
+    bootstrapServers: "kafka:9092"
 
 notifications:
   enabled: true
+  kafka:
+    bootstrapServers: "kafka:9092"
 
 gateway:
   enabled: true

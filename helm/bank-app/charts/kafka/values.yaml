@@ -1,0 +1,12 @@
+image:
+  repository: bitnami/kafka
+  tag: "3.9"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+service:
+  port: 9092
+
+storage:
+  size: 1Gi

@@ -23,5 +23,8 @@ dependencies:
 - name: bank-web
   repository: file://charts/bank-web
   version: 0.1.0
-digest: sha256:3d62dab7fd5585fba9a0b016fb4aff0bfce9625fb76f1ade2f7d6e96d5df8be1
-generated: "2026-06-07T00:35:44.8234407+03:00"
+- name: kafka
+  repository: file://charts/kafka
+  version: 0.1.0
+digest: sha256:63de848d5aabcc5c32fc0cefcca84cc8519151ed125bb067ad0aa5d0aeae7996
+generated: "2026-06-28T00:08:06.5027008+03:00"

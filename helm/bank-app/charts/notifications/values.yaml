@@ -7,3 +7,6 @@ replicaCount: 1
 
 service:
   port: 8083
+
+kafka:
+  bootstrapServers: "kafka:9092"
