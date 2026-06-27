@@ -1,0 +1,27 @@
+dependencies:
+- name: mysql
+  repository: file://charts/mysql
+  version: 0.1.0
+- name: auth-server
+  repository: file://charts/auth-server
+  version: 0.1.0
+- name: accounts
+  repository: file://charts/accounts
+  version: 0.1.0
+- name: cash
+  repository: file://charts/cash
+  version: 0.1.0
+- name: transfer
+  repository: file://charts/transfer
+  version: 0.1.0
+- name: notifications
+  repository: file://charts/notifications
+  version: 0.1.0
+- name: gateway
+  repository: file://charts/gateway
+  version: 0.1.0
+- name: bank-web
+  repository: file://charts/bank-web
+  version: 0.1.0
+digest: sha256:3d62dab7fd5585fba9a0b016fb4aff0bfce9625fb76f1ade2f7d6e96d5df8be1
+generated: "2026-06-07T00:35:44.8234407+03:00"

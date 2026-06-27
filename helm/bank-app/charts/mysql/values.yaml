@@ -1,0 +1,12 @@
+image:
+  repository: mysql
+  tag: "8.4"
+  pullPolicy: IfNotPresent
+
+rootPassword: secret
+
+service:
+  port: 3306
+
+storage:
+  size: 1Gi

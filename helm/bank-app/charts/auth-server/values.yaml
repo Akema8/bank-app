@@ -1,0 +1,13 @@
+image:
+  repository: bank-app/auth-server
+  pullPolicy: IfNotPresent
+  tag: latest
+
+replicaCount: 1
+
+service:
+  port: 9000
+  nodePort: 30900
+
+issuerUri: "http://localhost:30900"
+redirectUri: "http://localhost:30800/login/oauth2/code/bank-web"

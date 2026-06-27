@@ -1,0 +1,14 @@
+image:
+  repository: bank-app/transfer
+  pullPolicy: IfNotPresent
+  tag: latest
+
+replicaCount: 1
+
+service:
+  port: 8085
+
+db:
+  url: "r2dbc:mysql://mysql:3306/transfer"
+  username: root
+  password: secret

@@ -1,0 +1,14 @@
+image:
+  repository: bank-app/gateway
+  pullPolicy: IfNotPresent
+  tag: latest
+
+replicaCount: 1
+
+service:
+  port: 8090
+
+routes:
+  accountsUri: "http://accounts:8082"
+  cashUri: "http://cash:8084"
+  transferUri: "http://transfer:8085"

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "notifications.name" . }}-test-connection"
+  labels:
+    {{- include "notifications.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  restartPolicy: Never
+  containers:
+    - name: test
+      image: curlimages/curl:latest
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - curl -sf http://{{ include "notifications.name" . }}:{{ .Values.service.port }}/actuator/health

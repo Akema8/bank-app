@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "bank-web.name" . }}
+  labels:
+    {{- include "bank-web.labels" . | nindent 4 }}
+data:
+  EUREKA_CLIENT_ENABLED: "false"
+  SPRING_CLOUD_ZOOKEEPER_ENABLED: "false"
+  GATEWAY_URL: {{ .Values.gateway.url | quote }}
+  AUTH_URL: {{ .Values.authServer.internalUri | quote }}
+  SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_BANK_WEB_AUTHORIZATION_URI: {{ printf "%s/oauth2/authorize" .Values.authServer.externalUri | quote }}
+  SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_BANK_WEB_TOKEN_URI: {{ printf "%s/oauth2/token" .Values.authServer.internalUri | quote }}
+  SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_BANK_WEB_JWK_SET_URI: {{ printf "%s/oauth2/jwks" .Values.authServer.internalUri | quote }}
+  SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_BANK_WEB_USER_INFO_URI: {{ printf "%s/userinfo" .Values.authServer.internalUri | quote }}

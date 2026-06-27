@@ -15,6 +15,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/health/**").permitAll()
                         .requestMatchers("/register").permitAll()
                         .anyRequest().authenticated())
                 .oauth2Login(login -> login.defaultSuccessUrl("/account", true))

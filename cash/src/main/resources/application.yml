@@ -21,6 +21,9 @@ spring:
             client-secret: cash-secret
             authorization-grant-type: client_credentials
             scope: accounts.write, notifications.write
+        provider:
+          cash-client:
+            token-uri: ${AUTH_SERVER_URL:http://auth-server:9000}/oauth2/token
 
 server:
   port: 8084

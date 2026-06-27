@@ -13,15 +13,15 @@ spring:
         webflux:
           routes:
             - id: accounts
-              uri: lb://accounts
+              uri: ${ACCOUNTS_URI:lb://accounts}
               predicates:
                 - Path=/accounts/**
             - id: cash
-              uri: lb://cash
+              uri: ${CASH_URI:lb://cash}
               predicates:
                 - Path=/cash/**
             - id: transfer
-              uri: lb://transfer
+              uri: ${TRANSFER_URI:lb://transfer}
               predicates:
                 - Path=/transfer/**
 
