@@ -10,7 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import ru.yandex.practicum.accounts.client.NotificationsClient;
+import ru.yandex.practicum.accounts.kafka.NotificationEventProducer;
 import ru.yandex.practicum.accounts.dto.AccountDto;
 import ru.yandex.practicum.accounts.dto.AccountRegisterDto;
 import ru.yandex.practicum.accounts.dto.AccountUpdateDto;
@@ -33,7 +33,7 @@ class AccountServiceTest {
     private AccountRepository accountRepository;
 
     @Mock
-    private NotificationsClient notificationsClient;
+    private NotificationEventProducer notificationEventProducer;
 
     @InjectMocks
     private AccountService accountService;
@@ -166,13 +166,13 @@ class AccountServiceTest {
 
         when(accountRepository.findByLogin("user1")).thenReturn(Mono.just(account));
         when(accountRepository.save(any())).thenReturn(Mono.just(saved));
-        when(notificationsClient.notify(anyString(), anyString())).thenReturn(Mono.empty());
+        when(notificationEventProducer.send(anyString(), anyString())).thenReturn(Mono.empty());
 
         StepVerifier.create(accountService.deposit("user1", new BigDecimal("50.00")))
                 .assertNext(dto -> assertThat(dto.balance()).isEqualByComparingTo("150.00"))
                 .verifyComplete();
 
-        verify(notificationsClient).notify("user1", "Пополнение счёта: +50.00");
+        verify(notificationEventProducer).send("user1", "Пополнение счёта: +50.00");
     }
 
     @Test
@@ -182,13 +182,13 @@ class AccountServiceTest {
 
         when(accountRepository.findByLogin("user1")).thenReturn(Mono.just(account));
         when(accountRepository.save(any())).thenReturn(Mono.just(saved));
-        when(notificationsClient.notify(anyString(), anyString())).thenReturn(Mono.empty());
+        when(notificationEventProducer.send(anyString(), anyString())).thenReturn(Mono.empty());
 
         StepVerifier.create(accountService.withdraw("user1", new BigDecimal("40.00")))
                 .assertNext(dto -> assertThat(dto.balance()).isEqualByComparingTo("60.00"))
                 .verifyComplete();
 
-        verify(notificationsClient).notify("user1", "Снятие со счёта: -40.00");
+        verify(notificationEventProducer).send("user1", "Снятие со счёта: -40.00");
     }
 
     @Test

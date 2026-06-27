@@ -12,18 +12,13 @@ spring:
     url: ${DB_URL:r2dbc:mysql://localhost:3306/accounts}
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:}
-  security:
-    oauth2:
-      client:
-        registration:
-          accounts-client:
-            client-id: accounts-client
-            client-secret: accounts-secret
-            authorization-grant-type: client_credentials
-            scope: notifications.write
-        provider:
-          accounts-client:
-            token-uri: ${AUTH_SERVER_URL:http://auth-server:9000}/oauth2/token
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        spring.json.add.type.headers: false
 
 server:
   port: 8082
@@ -33,3 +28,7 @@ server:
 eureka:
   instance:
     prefer-ip-address: true
+
+kafka:
+  topic:
+    notifications: notifications

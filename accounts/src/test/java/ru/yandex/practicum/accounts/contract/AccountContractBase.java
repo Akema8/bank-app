@@ -12,7 +12,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.accounts.TestContainersConfig;
-import ru.yandex.practicum.accounts.client.NotificationsClient;
+import ru.yandex.practicum.accounts.kafka.NotificationEventProducer;
 import ru.yandex.practicum.accounts.model.Account;
 import ru.yandex.practicum.accounts.repository.AccountRepository;
 
@@ -41,7 +41,7 @@ public abstract class AccountContractBase extends TestContainersConfig {
     ReactiveJwtDecoder jwtDecoder;
 
     @MockitoBean
-    NotificationsClient notificationsClient;
+    NotificationEventProducer notificationEventProducer;
 
     @BeforeEach
     void setup() {
@@ -53,7 +53,7 @@ public abstract class AccountContractBase extends TestContainersConfig {
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .build();
         when(jwtDecoder.decode(anyString())).thenReturn(Mono.just(jwt));
-        when(notificationsClient.notify(anyString(), anyString())).thenReturn(Mono.empty());
+        when(notificationEventProducer.send(anyString(), anyString())).thenReturn(Mono.empty());
 
         accountRepository.deleteAll()
                 .then(accountRepository.save(new Account(
