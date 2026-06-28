@@ -135,7 +135,6 @@ public class SecurityConfig {
                 .clientSecret(encoder.encode("accounts-secret"))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .scope("notifications.write")
                 .build();
 
         RegisteredClient cashClient = RegisteredClient.withId(UUID.randomUUID().toString())
@@ -144,7 +143,6 @@ public class SecurityConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .scope("accounts.write")
-                .scope("notifications.write")
                 .build();
 
         RegisteredClient transferClient = RegisteredClient.withId(UUID.randomUUID().toString())
@@ -153,7 +151,6 @@ public class SecurityConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .scope("accounts.write")
-                .scope("notifications.write")
                 .build();
 
         return new InMemoryRegisteredClientRepository(bankWebClient, accountsClient, cashClient, transferClient);
