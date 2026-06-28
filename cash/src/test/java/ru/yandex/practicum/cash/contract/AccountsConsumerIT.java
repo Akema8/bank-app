@@ -13,9 +13,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import ru.yandex.practicum.cash.TestContainersConfig;
 import ru.yandex.practicum.cash.dto.AccountDto;
+import ru.yandex.practicum.cash.kafka.NotificationEventProducer;
 import ru.yandex.practicum.cash.dto.CashRequestDto;
 import ru.yandex.practicum.cash.service.CashService;
 
@@ -28,6 +30,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureWireMock(port = 9552)
@@ -45,11 +49,6 @@ class AccountsConsumerIT extends TestContainersConfig {
         WebClient accountsWebClient() {
             return WebClient.builder().baseUrl("http://localhost:9552").build();
         }
-
-        @Bean
-        WebClient notificationsWebClient() {
-            return WebClient.builder().baseUrl("http://localhost:9552").build();
-        }
     }
 
     @Autowired
@@ -57,6 +56,9 @@ class AccountsConsumerIT extends TestContainersConfig {
 
     @MockitoBean
     ReactiveJwtDecoder jwtDecoder;
+
+    @MockitoBean
+    NotificationEventProducer notificationEventProducer;
 
     @Test
     void deposit_matchesAccountsContract_sendsCorrectRequest() {
@@ -70,8 +72,7 @@ class AccountsConsumerIT extends TestContainersConfig {
                                 {"id":1,"login":"user1","name":"Иван","birthdate":"1990-01-01","balance":600.00}
                                 """)));
 
-        stubFor(post(urlEqualTo("/notifications"))
-                .willReturn(aResponse().withStatus(202)));
+        when(notificationEventProducer.send(anyString(), anyString())).thenReturn(Mono.empty());
 
         StepVerifier.create(cashService.deposit("user1", new CashRequestDto(new BigDecimal("100.00"))))
                 .assertNext(dto -> {

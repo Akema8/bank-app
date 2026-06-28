@@ -19,6 +19,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.transfer.TestContainersConfig;
+import ru.yandex.practicum.transfer.kafka.NotificationEventProducer;
 import ru.yandex.practicum.transfer.repository.TransferTransactionRepository;
 
 import java.time.Instant;
@@ -47,11 +48,6 @@ public abstract class TransferContractBase extends TestContainersConfig {
         WebClient accountsWebClient() {
             return WebClient.builder().baseUrl("http://localhost:9562").build();
         }
-
-        @Bean
-        WebClient notificationsWebClient() {
-            return WebClient.builder().baseUrl("http://localhost:9562").build();
-        }
     }
 
     @Autowired
@@ -63,6 +59,9 @@ public abstract class TransferContractBase extends TestContainersConfig {
     @MockitoBean
     ReactiveJwtDecoder jwtDecoder;
 
+    @MockitoBean
+    NotificationEventProducer notificationEventProducer;
+
     @BeforeEach
     void setup() {
         Jwt jwt = Jwt.withTokenValue("test-token")
@@ -73,6 +72,7 @@ public abstract class TransferContractBase extends TestContainersConfig {
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .build();
         when(jwtDecoder.decode(anyString())).thenReturn(Mono.just(jwt));
+        when(notificationEventProducer.send(anyString(), anyString())).thenReturn(Mono.empty());
 
         repository.deleteAll().block();
         WireMock.reset();
@@ -91,8 +91,6 @@ public abstract class TransferContractBase extends TestContainersConfig {
                         .withBody("""
                                 {"id":2,"login":"recipient","name":"Мария","birthdate":"1992-05-15","balance":600.00}
                                 """)));
-        stubFor(post("/notifications")
-                .willReturn(aResponse().withStatus(202)));
 
         RestAssuredWebTestClient.webTestClient(webTestClient);
     }

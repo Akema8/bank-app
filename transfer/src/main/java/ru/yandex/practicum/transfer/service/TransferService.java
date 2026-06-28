@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.transfer.dto.AccountDto;
 import ru.yandex.practicum.transfer.dto.TransferRequestDto;
+import ru.yandex.practicum.transfer.kafka.NotificationEventProducer;
 import ru.yandex.practicum.transfer.model.TransferTransaction;
 import ru.yandex.practicum.transfer.repository.TransferTransactionRepository;
 
@@ -23,7 +24,7 @@ import java.util.Map;
 public class TransferService {
 
     private final WebClient accountsWebClient;
-    private final WebClient notificationsWebClient;
+    private final NotificationEventProducer notificationEventProducer;
     private final TransferTransactionRepository repository;
 
     public Mono<AccountDto> transfer(String fromLogin, TransferRequestDto dto) {
@@ -45,8 +46,10 @@ public class TransferService {
                                 )
                                 .flatMap(toAccount ->
                                         saveSuccess(fromLogin, dto)
-                                                .then(notify(fromLogin, "Перевод " + dto.amount() + " пользователю " + dto.toLogin()))
-                                                .then(notify(dto.toLogin(), "Получен перевод " + dto.amount() + " от " + fromLogin))
+                                                .then(notificationEventProducer.send(fromLogin,
+                                                        "Перевод " + dto.amount() + " пользователю " + dto.toLogin()))
+                                                .then(notificationEventProducer.send(dto.toLogin(),
+                                                        "Получен перевод " + dto.amount() + " от " + fromLogin))
                                                 .thenReturn(senderAccount)
                                 )
                 );
@@ -80,17 +83,5 @@ public class TransferService {
         if (msg != null && msg.length() > 500) msg = msg.substring(0, 500);
         return repository.save(new TransferTransaction(
                 null, fromLogin, dto.toLogin(), dto.amount(), "FAILED", msg, LocalDateTime.now()));
-    }
-
-    private Mono<Void> notify(String login, String message) {
-        return notificationsWebClient.post()
-                .uri("/notifications")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(Map.of("login", login, "message", message))
-                .retrieve()
-                .toBodilessEntity()
-                .doOnError(e -> log.warn("Notifications call failed for {}: {}", login, e.getMessage()))
-                .onErrorResume(e -> Mono.empty())
-                .then();
     }
 }

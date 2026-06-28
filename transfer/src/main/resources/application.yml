@@ -20,10 +20,21 @@ spring:
             client-id: transfer-client
             client-secret: transfer-secret
             authorization-grant-type: client_credentials
-            scope: accounts.write, notifications.write
+            scope: accounts.write
         provider:
           transfer-client:
             token-uri: ${AUTH_SERVER_URL:http://auth-server:9000}/oauth2/token
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        spring.json.add.type.headers: false
+
+kafka:
+  topic:
+    notifications: notifications
 
 server:
   port: 8085

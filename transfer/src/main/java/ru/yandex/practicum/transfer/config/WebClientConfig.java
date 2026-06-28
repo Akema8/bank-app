@@ -41,14 +41,6 @@ public class WebClientConfig {
         return buildClient(accountsUrl, webClientBuilder, authorizedClientManager);
     }
 
-    @Bean
-    @Profile("!test")
-    WebClient notificationsWebClient(WebClient.Builder webClientBuilder,
-                                     ReactiveOAuth2AuthorizedClientManager authorizedClientManager,
-                                     @Value("${notifications.url:http://notifications:8083}") String notificationsUrl) {
-        return buildClient(notificationsUrl, webClientBuilder, authorizedClientManager);
-    }
-
     private WebClient buildClient(String baseUrl, WebClient.Builder builder,
                                   ReactiveOAuth2AuthorizedClientManager manager) {
         var oauth2 = new ServerOAuth2AuthorizedClientExchangeFilterFunction(manager);

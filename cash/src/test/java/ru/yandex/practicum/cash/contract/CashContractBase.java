@@ -19,6 +19,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.cash.TestContainersConfig;
+import ru.yandex.practicum.cash.kafka.NotificationEventProducer;
 import ru.yandex.practicum.cash.repository.CashTransactionRepository;
 
 import java.time.Instant;
@@ -47,11 +48,6 @@ public abstract class CashContractBase extends TestContainersConfig {
         WebClient accountsWebClient() {
             return WebClient.builder().baseUrl("http://localhost:9553").build();
         }
-
-        @Bean
-        WebClient notificationsWebClient() {
-            return WebClient.builder().baseUrl("http://localhost:9553").build();
-        }
     }
 
     @Autowired
@@ -63,6 +59,9 @@ public abstract class CashContractBase extends TestContainersConfig {
     @MockitoBean
     ReactiveJwtDecoder jwtDecoder;
 
+    @MockitoBean
+    NotificationEventProducer notificationEventProducer;
+
     @BeforeEach
     void setup() {
         Jwt jwt = Jwt.withTokenValue("test-token")
@@ -73,6 +72,7 @@ public abstract class CashContractBase extends TestContainersConfig {
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .build();
         when(jwtDecoder.decode(anyString())).thenReturn(Mono.just(jwt));
+        when(notificationEventProducer.send(anyString(), anyString())).thenReturn(Mono.empty());
 
         repository.deleteAll().block();
         WireMock.reset();
@@ -84,9 +84,6 @@ public abstract class CashContractBase extends TestContainersConfig {
                         .withBody("""
                                 {"id":1,"login":"user1","name":"Иван","birthdate":"1990-01-01","balance":600.00}
                                 """)));
-
-        stubFor(post("/notifications")
-                .willReturn(aResponse().withStatus(202)));
 
         RestAssuredWebTestClient.webTestClient(webTestClient);
     }

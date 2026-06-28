@@ -18,7 +18,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.transfer.TestContainersConfig;
+import ru.yandex.practicum.transfer.kafka.NotificationEventProducer;
 import ru.yandex.practicum.transfer.repository.TransferTransactionRepository;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -27,6 +29,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -46,11 +50,6 @@ class TransferControllerIT extends TestContainersConfig {
         WebClient accountsWebClient() {
             return WebClient.builder().baseUrl("http://localhost:9561").build();
         }
-
-        @Bean
-        WebClient notificationsWebClient() {
-            return WebClient.builder().baseUrl("http://localhost:9561").build();
-        }
     }
 
     @Autowired
@@ -61,6 +60,9 @@ class TransferControllerIT extends TestContainersConfig {
 
     @MockitoBean
     ReactiveJwtDecoder jwtDecoder;
+
+    @MockitoBean
+    NotificationEventProducer notificationEventProducer;
 
     private static final String SENDER_ACCOUNT = """
             {"id":1,"login":"sender","name":"Иван","birthdate":"1990-01-01","balance":400.00}
@@ -73,7 +75,7 @@ class TransferControllerIT extends TestContainersConfig {
     void setup() {
         repository.deleteAll().block();
         WireMock.reset();
-        stubFor(post("/notifications").willReturn(aResponse().withStatus(202)));
+        when(notificationEventProducer.send(anyString(), anyString())).thenReturn(Mono.empty());
     }
 
     @Test
