@@ -13,3 +13,4 @@ data:
   SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_BANK_WEB_TOKEN_URI: {{ printf "%s/oauth2/token" .Values.authServer.internalUri | quote }}
   SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_BANK_WEB_JWK_SET_URI: {{ printf "%s/oauth2/jwks" .Values.authServer.internalUri | quote }}
   SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_BANK_WEB_USER_INFO_URI: {{ printf "%s/userinfo" .Values.authServer.internalUri | quote }}
+  LOGSTASH_HOST: logstash

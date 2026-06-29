@@ -16,7 +16,9 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "ru.yandex.practicum.common.kafka.dto"
-        spring.json.value.default.type: "ru.yandex.practicum.notifications.dto.NotificationEvent"
+        spring.json.value.default.type: "ru.yandex.practicum.common.kafka.dto.NotificationEvent"
+    listener:
+      observation-enabled: true
 
 server:
   port: 8083
@@ -28,3 +30,15 @@ eureka:
 kafka:
   topic:
     notifications: notifications
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://${ZIPKIN_HOST:zipkin}:9411/api/v2/spans

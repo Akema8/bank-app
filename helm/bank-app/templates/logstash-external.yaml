@@ -1,0 +1,15 @@
+{{- if .Values.elk.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+  labels:
+    app: logstash-external
+spec:
+  type: ExternalName
+  externalName: {{ .Values.elk.logstashHost }}
+  ports:
+    - name: tcp
+      port: 5044
+      targetPort: 5044
+{{- end }}

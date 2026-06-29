@@ -1,5 +1,6 @@
 package ru.yandex.practicum.transfer.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ public class TransferService {
     private final WebClient accountsWebClient;
     private final NotificationEventProducer notificationEventProducer;
     private final TransferTransactionRepository repository;
+    private final MeterRegistry meterRegistry;
 
     public Mono<AccountDto> transfer(String fromLogin, TransferRequestDto dto) {
         if (fromLogin.equals(dto.toLogin())) {
@@ -40,6 +42,8 @@ public class TransferService {
                                         // Компенсация: вернуть деньги отправителю
                                         deposit(fromLogin, dto.amount())
                                                 .then(saveFailed(fromLogin, dto, depositError))
+                                                .doOnSuccess(ignored -> meterRegistry.counter(
+                                                        "transfer.failures", "from", fromLogin, "to", dto.toLogin()).increment())
                                                 .then(Mono.error(new ResponseStatusException(
                                                         HttpStatus.BAD_REQUEST,
                                                         "Перевод не выполнен: " + depositError.getMessage())))

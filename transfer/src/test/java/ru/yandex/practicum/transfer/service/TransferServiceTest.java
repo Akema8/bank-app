@@ -1,8 +1,10 @@
 package ru.yandex.practicum.transfer.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -42,6 +44,8 @@ class TransferServiceTest {
     NotificationEventProducer notificationEventProducer;
     @Mock
     TransferTransactionRepository repository;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    MeterRegistry meterRegistry;
 
     TransferService transferService;
 
@@ -60,7 +64,7 @@ class TransferServiceTest {
 
     @BeforeEach
     void setUp() {
-        transferService = new TransferService(accountsWebClient, notificationEventProducer, repository);
+        transferService = new TransferService(accountsWebClient, notificationEventProducer, repository, meterRegistry);
 
         senderAccount = new AccountDto(1L, "sender", "Иван", LocalDate.of(1990, 1, 1), new BigDecimal("400.00"));
         recipientAccount = new AccountDto(2L, "recipient", "Мария", LocalDate.of(1992, 5, 15), new BigDecimal("600.00"));
