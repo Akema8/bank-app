@@ -23,6 +23,10 @@ zipkin:
 prometheus:
   enabled: true
 
+# Grafana
+grafana:
+  enabled: true
+
 # Backend сервисы
 accounts:
   enabled: true
