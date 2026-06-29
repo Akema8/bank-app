@@ -16,7 +16,7 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "ru.yandex.practicum.common.kafka.dto"
-        spring.json.value.default.type: "ru.yandex.practicum.notifications.dto.NotificationEvent"
+        spring.json.value.default.type: "ru.yandex.practicum.common.kafka.dto.NotificationEvent"
     listener:
       observation-enabled: true
 
