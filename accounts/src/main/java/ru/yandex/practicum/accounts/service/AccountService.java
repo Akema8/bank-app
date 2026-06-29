@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.yandex.practicum.accounts.client.NotificationsClient;
+import ru.yandex.practicum.common.kafka.NotificationEventProducer;
 import ru.yandex.practicum.accounts.dto.AccountDto;
 import ru.yandex.practicum.accounts.dto.AccountRegisterDto;
 import ru.yandex.practicum.accounts.dto.AccountShortDto;
@@ -22,7 +22,7 @@ import java.time.LocalDate;
 public class AccountService {
 
     private final AccountRepository accountRepository;
-    private final NotificationsClient notificationsClient;
+    private final NotificationEventProducer notificationEventProducer;
 
     public Mono<AccountDto> register(AccountRegisterDto dto) {
         return validateAge(dto.birthdate())
@@ -60,7 +60,7 @@ public class AccountService {
                     return accountRepository.save(account);
                 })
                 .map(this::toDto)
-                .flatMap(dto -> notificationsClient.notify(login, "Пополнение счёта: +" + amount)
+                .flatMap(dto -> notificationEventProducer.send(login, "Пополнение счёта: +" + amount)
                         .thenReturn(dto));
     }
 
@@ -75,7 +75,7 @@ public class AccountService {
                     return accountRepository.save(account);
                 })
                 .map(this::toDto)
-                .flatMap(dto -> notificationsClient.notify(login, "Снятие со счёта: -" + amount)
+                .flatMap(dto -> notificationEventProducer.send(login, "Снятие со счёта: -" + amount)
                         .thenReturn(dto));
     }
 

@@ -6,3 +6,5 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: https://placeholder.invalid/jwks
+  kafka:
+    bootstrap-servers: localhost:9092

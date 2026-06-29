@@ -12,9 +12,10 @@
 | `gateway` | 8090 | ClusterIP 8090 | Spring Cloud Gateway. Маршрутизирует запросы к accounts/cash/transfer. |
 | `auth-server` | 9000 | NodePort 30900 | Spring Authorization Server. JWT по Authorization Code и Client Credentials. |
 | `accounts` | 8082 | ClusterIP 8082 | CRUD аккаунтов (логин/ФИО/дата рождения/баланс). |
-| `cash` | 8084 | ClusterIP 8084 | Внесение/снятие наличных. Вызывает accounts и notifications. |
-| `transfer` | 8085 | ClusterIP 8085 | Переводы между пользователями. Сага с компенсацией. |
-| `notifications` | 8083 | ClusterIP 8083 | Эмулирует отправку уведомлений. |
+| `cash` | 8084 | ClusterIP 8084 | Внесение/снятие наличных. Вызывает accounts по REST, уведомления через Kafka. |
+| `transfer` | 8085 | ClusterIP 8085 | Переводы между пользователями. Сага с компенсацией. Уведомления через Kafka. |
+| `notifications` | 8083 | ClusterIP 8083 | Kafka-консьюмер. Логирует входящие уведомления. |
+| `kafka` | — | ClusterIP 9092 | Apache Kafka 3.9 (KRaft). Топик `notifications`. |
 | `mysql` | 3307 | StatefulSet 3306 | MySQL 8.4. Базы `accounts`, `cash`, `transfer`. |
 | `eureka-server` | 8761 | — | Service Discovery (только Docker Compose). |
 | `zookeeper` | 2181 | — | Distributed Config (только Docker Compose). |
@@ -198,7 +199,7 @@ docker compose down -v       # удалить данные MySQL
 ./mvnw -pl accounts test
 ```
 
-Используют **Testcontainers** для MySQL - нужен запущенный Docker.
+Интеграционные тесты используют **Testcontainers** для MySQL (нужен запущенный Docker) и **`@EmbeddedKafka`** для Kafka-тестов (брокер не нужен).
 
 ---
 
@@ -207,16 +208,16 @@ docker compose down -v       # удалить данные MySQL
 ### Безопасность
 
 - **bank-web → auth-server:** OAuth2 Authorization Code Flow (OIDC).
-- **cash/transfer → accounts/notifications:** OAuth2 Client Credentials (сервис-к-сервису).
+- **cash/transfer → accounts:** OAuth2 Client Credentials (сервис-к-сервису).
 - **JWT-валидация:** все ресурсные сервисы валидируют токены через JWKS (`/oauth2/jwks`).
-- Скоупы: `cash.write`, `transfer.write`, `accounts.write`, `notifications.write`.
+- Скоупы: `cash.write`, `transfer.write`, `accounts.write`.
 
 ### Сервисы
 
 - **bank-web** — Spring MVC + Thymeleaf, три блока: аккаунт / деньги / перевод.
-- **accounts** — WebFlux + R2DBC. CRUD аккаунтов, deposit/withdraw, вызовы в notifications.
-- **cash** — WebFlux + R2DBC. Журнал транзакций, вызовы accounts и notifications.
-- **transfer** — WebFlux + R2DBC. Двухэтапный перевод (withdraw → deposit) с откатом при ошибке.
-- **notifications** — Spring MVC. Логирование уведомлений.
+- **accounts** — WebFlux + R2DBC. CRUD аккаунтов, deposit/withdraw. Публикует события в Kafka.
+- **cash** — WebFlux + R2DBC. Журнал транзакций, вызовы accounts по REST. Публикует события в Kafka.
+- **transfer** — WebFlux + R2DBC. Двухэтапный перевод (withdraw → deposit) с откатом при ошибке. Публикует события в Kafka.
+- **notifications** — WebFlux. Kafka-консьюмер топика `notifications`. Логирует уведомления.
 - **auth-server** — Spring Authorization Server + UI логина/регистрации.
 - **gateway** — Spring Cloud Gateway, маршруты к accounts/cash/transfer, JWT-валидация.

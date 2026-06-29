@@ -7,12 +7,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import ru.yandex.practicum.cash.dto.AccountDto;
 import ru.yandex.practicum.cash.dto.CashRequestDto;
+import ru.yandex.practicum.common.kafka.NotificationEventProducer;
 import ru.yandex.practicum.cash.model.CashTransaction;
 import ru.yandex.practicum.cash.repository.CashTransactionRepository;
 
@@ -36,11 +36,10 @@ class CashServiceTest {
     @Mock
     WebClient accountsWebClient;
     @Mock
-    WebClient notificationsWebClient;
+    NotificationEventProducer notificationEventProducer;
     @Mock
     CashTransactionRepository repository;
 
-    // Manually construct to avoid Mockito injecting same WebClient mock into both fields
     CashService cashService;
 
     private AccountDto accountDto;
@@ -48,10 +47,10 @@ class CashServiceTest {
 
     @BeforeEach
     void setUp() {
-        cashService = new CashService(accountsWebClient, notificationsWebClient, repository);
+        cashService = new CashService(accountsWebClient, notificationEventProducer, repository);
         accountDto = new AccountDto(1L, "user1", "Иван", LocalDate.of(1990, 1, 1), new BigDecimal("200.00"));
         savedTx = new CashTransaction(1L, "user1", "DEPOSIT", new BigDecimal("50.00"), LocalDateTime.now());
-        setupNotificationsChain(Mono.just(ResponseEntity.accepted().<Void>build()));
+        when(notificationEventProducer.send(anyString(), anyString())).thenReturn(Mono.empty());
     }
 
     private void setupAccountsChain(Mono<AccountDto> response) {
@@ -67,19 +66,6 @@ class CashServiceTest {
         when(responseSpec.bodyToMono(AccountDto.class)).thenReturn(response);
     }
 
-    private void setupNotificationsChain(Mono response) {
-        WebClient.RequestBodyUriSpec uriSpec = mock(WebClient.RequestBodyUriSpec.class);
-        WebClient.RequestBodySpec bodySpec = mock(WebClient.RequestBodySpec.class);
-        WebClient.RequestHeadersSpec headersSpec = mock(WebClient.RequestHeadersSpec.class);
-        WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
-        when(notificationsWebClient.post()).thenReturn(uriSpec);
-        when(uriSpec.uri(anyString())).thenReturn(bodySpec);
-        when(bodySpec.contentType(any())).thenReturn(bodySpec);
-        when(bodySpec.bodyValue(any())).thenReturn(headersSpec);
-        when(headersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.toBodilessEntity()).thenReturn(response);
-    }
-
     @Test
     void deposit_success_savesTransactionAndReturnsAccount() {
         setupAccountsChain(Mono.just(accountDto));
@@ -90,6 +76,7 @@ class CashServiceTest {
                 .verifyComplete();
 
         verify(repository).save(any(CashTransaction.class));
+        verify(notificationEventProducer).send("user1", "Зачисление 50.00");
     }
 
     @Test
@@ -104,17 +91,7 @@ class CashServiceTest {
                 .verifyComplete();
 
         verify(repository).save(any(CashTransaction.class));
-    }
-
-    @Test
-    void deposit_notificationFailure_stillReturnsAccount() {
-        setupAccountsChain(Mono.just(accountDto));
-        setupNotificationsChain(Mono.error(new RuntimeException("notifications unavailable")));
-        when(repository.save(any())).thenReturn(Mono.just(savedTx));
-
-        StepVerifier.create(cashService.deposit("user1", new CashRequestDto(new BigDecimal("50.00"))))
-                .assertNext(dto -> assertThat(dto.balance()).isEqualByComparingTo("200.00"))
-                .verifyComplete();
+        verify(notificationEventProducer).send("user1", "Снятие 50.00");
     }
 
     @Test

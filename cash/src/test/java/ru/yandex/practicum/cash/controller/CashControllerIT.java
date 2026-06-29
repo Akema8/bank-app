@@ -18,13 +18,17 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.cash.TestContainersConfig;
+import ru.yandex.practicum.common.kafka.NotificationEventProducer;
 import ru.yandex.practicum.cash.repository.CashTransactionRepository;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -44,11 +48,6 @@ class CashControllerIT extends TestContainersConfig {
         WebClient accountsWebClient() {
             return WebClient.builder().baseUrl("http://localhost:9551").build();
         }
-
-        @Bean
-        WebClient notificationsWebClient() {
-            return WebClient.builder().baseUrl("http://localhost:9551").build();
-        }
     }
 
     @Autowired
@@ -60,6 +59,9 @@ class CashControllerIT extends TestContainersConfig {
     @MockitoBean
     ReactiveJwtDecoder jwtDecoder;
 
+    @MockitoBean
+    NotificationEventProducer notificationEventProducer;
+
     private static final String ACCOUNT_RESPONSE = """
             {"id":1,"login":"user1","name":"Иван","birthdate":"1990-01-01","balance":600.00}
             """;
@@ -68,15 +70,13 @@ class CashControllerIT extends TestContainersConfig {
     void setup() {
         repository.deleteAll().block();
         WireMock.reset();
+        when(notificationEventProducer.send(anyString(), anyString())).thenReturn(Mono.empty());
 
         stubFor(post(urlPathMatching("/accounts/.+/(deposit|withdraw)"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(ACCOUNT_RESPONSE)));
-
-        stubFor(post("/notifications")
-                .willReturn(aResponse().withStatus(202)));
     }
 
     @Test
