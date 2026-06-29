@@ -19,6 +19,8 @@ spring:
       acks: all
       properties:
         spring.json.add.type.headers: false
+    template:
+      observation-enabled: true
 
 server:
   port: 8082
@@ -32,3 +34,11 @@ eureka:
 kafka:
   topic:
     notifications: notifications
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://${ZIPKIN_HOST:zipkin}:9411/api/v2/spans
