@@ -27,6 +27,11 @@ prometheus:
 grafana:
   enabled: true
 
+# ELK (снаружи кластера, подключается через ExternalName Service)
+elk:
+  enabled: true
+  logstashHost: host.docker.internal  # Rancher Desktop / Docker Desktop
+
 # Backend сервисы
 accounts:
   enabled: true
