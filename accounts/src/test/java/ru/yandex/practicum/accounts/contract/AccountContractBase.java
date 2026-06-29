@@ -12,7 +12,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.accounts.TestContainersConfig;
-import ru.yandex.practicum.accounts.kafka.NotificationEventProducer;
+import ru.yandex.practicum.common.kafka.NotificationEventProducer;
 import ru.yandex.practicum.accounts.model.Account;
 import ru.yandex.practicum.accounts.repository.AccountRepository;
 

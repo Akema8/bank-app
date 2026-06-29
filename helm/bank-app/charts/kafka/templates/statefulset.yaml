@@ -57,8 +57,11 @@ spec:
             - name: data
               mountPath: /bitnami/kafka
           readinessProbe:
-            tcpSocket:
-              port: kafka
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - kafka-broker-api-versions.sh --bootstrap-server localhost:9092
             initialDelaySeconds: 20
             periodSeconds: 10
             timeoutSeconds: 5

@@ -15,7 +15,7 @@ import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.TestPropertySource;
 import reactor.test.StepVerifier;
 import ru.yandex.practicum.accounts.TestContainersConfig;
-import ru.yandex.practicum.accounts.dto.NotificationEvent;
+import ru.yandex.practicum.common.kafka.dto.NotificationEvent;
 
 import java.time.Duration;
 import java.util.Map;

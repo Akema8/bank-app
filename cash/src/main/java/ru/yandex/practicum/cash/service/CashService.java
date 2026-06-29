@@ -8,7 +8,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.cash.dto.AccountDto;
 import ru.yandex.practicum.cash.dto.CashRequestDto;
-import ru.yandex.practicum.cash.kafka.NotificationEventProducer;
+import ru.yandex.practicum.common.kafka.NotificationEventProducer;
 import ru.yandex.practicum.cash.model.CashTransaction;
 import ru.yandex.practicum.cash.repository.CashTransactionRepository;
 

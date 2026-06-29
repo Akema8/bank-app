@@ -19,7 +19,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.transfer.TestContainersConfig;
-import ru.yandex.practicum.transfer.kafka.NotificationEventProducer;
+import ru.yandex.practicum.common.kafka.NotificationEventProducer;
 import ru.yandex.practicum.transfer.repository.TransferTransactionRepository;
 
 import java.time.Instant;

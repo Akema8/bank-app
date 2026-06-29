@@ -20,7 +20,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.cash.TestContainersConfig;
-import ru.yandex.practicum.cash.kafka.NotificationEventProducer;
+import ru.yandex.practicum.common.kafka.NotificationEventProducer;
 import ru.yandex.practicum.cash.repository.CashTransactionRepository;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;

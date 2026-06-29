@@ -1,19 +1,17 @@
-package ru.yandex.practicum.accounts.kafka;
+package ru.yandex.practicum.common.kafka;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-import ru.yandex.practicum.accounts.dto.NotificationEvent;
+import ru.yandex.practicum.common.kafka.dto.NotificationEvent;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class NotificationEventProducer {
 
-    private final KafkaTemplate<Object, Object> kafkaTemplate;
+    private final KafkaTemplate<String, NotificationEvent> kafkaTemplate;
 
     @Value("${kafka.topic.notifications}")
     private String topic;

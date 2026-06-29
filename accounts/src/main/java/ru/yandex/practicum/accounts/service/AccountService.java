@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.yandex.practicum.accounts.kafka.NotificationEventProducer;
+import ru.yandex.practicum.common.kafka.NotificationEventProducer;
 import ru.yandex.practicum.accounts.dto.AccountDto;
 import ru.yandex.practicum.accounts.dto.AccountRegisterDto;
 import ru.yandex.practicum.accounts.dto.AccountShortDto;

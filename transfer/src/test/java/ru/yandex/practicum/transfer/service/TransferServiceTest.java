@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import ru.yandex.practicum.transfer.dto.AccountDto;
 import ru.yandex.practicum.transfer.dto.TransferRequestDto;
-import ru.yandex.practicum.transfer.kafka.NotificationEventProducer;
+import ru.yandex.practicum.common.kafka.NotificationEventProducer;
 import ru.yandex.practicum.transfer.model.TransferTransaction;
 import ru.yandex.practicum.transfer.repository.TransferTransactionRepository;
 

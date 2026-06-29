@@ -33,6 +33,7 @@
 	</dependencyManagement>
 
 	<modules>
+		<module>common-kafka</module>
 		<module>bank-web</module>
 		<module>accounts</module>
 		<module>auth-server</module>
