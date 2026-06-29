@@ -1,5 +1,7 @@
 package ru.yandex.practicum.common.kafka;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.micrometer.observation.ObservationRegistry;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -18,7 +20,8 @@ public class NotificationKafkaAutoConfiguration {
     @ConditionalOnMissingBean
     public NotificationEventProducer notificationEventProducer(
             KafkaProperties kafkaProperties,
-            ObjectProvider<ObservationRegistry> observationRegistry) {
+            ObjectProvider<ObservationRegistry> observationRegistry,
+            ObjectProvider<MeterRegistry> meterRegistry) {
         var factory = new DefaultKafkaProducerFactory<String, NotificationEvent>(
                 kafkaProperties.buildProducerProperties(null));
         var template = new KafkaTemplate<>(factory);
@@ -26,6 +29,6 @@ public class NotificationKafkaAutoConfiguration {
             template.setObservationEnabled(true);
             template.setObservationRegistry(registry);
         });
-        return new NotificationEventProducer(template);
+        return new NotificationEventProducer(template, meterRegistry.getIfAvailable(SimpleMeterRegistry::new));
     }
 }

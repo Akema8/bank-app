@@ -1,0 +1,12 @@
+image:
+  repository: prom/prometheus
+  tag: "v2.53.0"
+  pullPolicy: IfNotPresent
+
+service:
+  port: 9090
+  nodePort: 30909
+
+scrape:
+  interval: 15s
+  timeout: 10s

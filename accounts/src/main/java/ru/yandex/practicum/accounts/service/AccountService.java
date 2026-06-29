@@ -1,5 +1,6 @@
 package ru.yandex.practicum.accounts.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final NotificationEventProducer notificationEventProducer;
+    private final MeterRegistry meterRegistry;
 
     public Mono<AccountDto> register(AccountRegisterDto dto) {
         return validateAge(dto.birthdate())
@@ -68,6 +70,7 @@ public class AccountService {
         return findOrThrow(login)
                 .flatMap(account -> {
                     if (account.getBalance().compareTo(amount) < 0) {
+                        meterRegistry.counter("cash.withdraw.failures", "login", login).increment();
                         return Mono.error(new ResponseStatusException(
                                 HttpStatus.BAD_REQUEST, "Недостаточно средств на счёте"));
                     }

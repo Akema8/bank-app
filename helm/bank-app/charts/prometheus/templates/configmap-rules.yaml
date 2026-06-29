@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "prometheus.name" . }}-rules
+  labels:
+    {{- include "prometheus.labels" . | nindent 4 }}
+data:
+  rules.yml: |
+    groups:
+      - name: bank-app
+        rules:
+          - alert: HighHttpErrorRate
+            expr: rate(http_server_requests_seconds_count{status=~"5.."}[5m]) > 0.1
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High HTTP 5xx rate on {{ $labels.job }}"
+
+          - alert: WithdrawFailures
+            expr: increase(cash_withdraw_failures_total[10m]) > 10
+            for: 1m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Too many withdraw failures for {{ $labels.login }}"
+
+          - alert: TransferFailures
+            expr: increase(transfer_failures_total[10m]) > 10
+            for: 1m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Too many failed transfers from {{ $labels.from }}"
+
+          - alert: NotificationFailures
+            expr: increase(notification_send_failures_total[5m]) > 5
+            for: 1m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kafka notification delivery failures for {{ $labels.login }}"

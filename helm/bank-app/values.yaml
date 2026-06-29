@@ -15,6 +15,14 @@ auth-server:
 kafka:
   enabled: true
 
+# Zipkin
+zipkin:
+  enabled: true
+
+# Prometheus
+prometheus:
+  enabled: true
+
 # Backend сервисы
 accounts:
   enabled: true
